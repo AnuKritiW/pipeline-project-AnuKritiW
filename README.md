@@ -1,1 +1,34 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/Tn7g_Mhz)
+
+# Pipeline Project Ideas
+
+## 1. VSCode plugin for VEX
+
+A plugin that gives API suggestions as you type into vscode.
+After deciding on the API, there is a parameter hint box that appears with the API description, argument help, etc.
+
+Here is a mockup:
+
+![extension-mockup](./assets/extension-mockup.png)
+
+![APISuggestions-mockup](./assets/APISuggestions-mockup.png)
+
+![APIHint-mockup](./assets/APIHint-mockup.png)
+
+If there is time,a VIM plugin can be an extension to the project.
+
+## 2. Companion e-ink display
+
+This project aims to develop an E-Ink companion display that provides real-time, off-screen insights for users of Houdini or RenderMan. 
+
+For Houdini, the display will show critical background information, such as memory usage, cache sizes, disk I/O, and live error tracking, helping users monitor system performance and identify bottlenecks while working. 
+
+For RenderMan, the display will focus on render-specific metrics, including memory usage, disk I/O, and render performance details like texture memory usage and system bottlenecks. 
+
+The device will offer a clean, always-on display that enhances workflow efficiency by surfacing important data not readily visible in the primary UI.
+
+Here is a mockup:
+
+![einkDisplay-mockup](./assets/einkDisplay-mockup.png)
+
+I'm not sure if this would be useful as a pipeline tool. If it is, I would need to ask artists what statistics would be useful to display.
