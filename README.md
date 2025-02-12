@@ -27,11 +27,12 @@ For RenderMan, the display will focus on render-specific metrics, including memo
 
 The device will offer a clean, always-on display that enhances workflow efficiency by surfacing important data not readily visible in the primary UI.
 
+**I'm not sure if this would be useful as a pipeline tool. If it is, I would need to ask artists what statistics would be useful to display -- ideally some useful stats from Houdini directly.**
+
 Here is a mockup:
 
 ![einkDisplay-mockup](./assets/einkDisplay-mockup.png)
 
-I'm not sure if this would be useful as a pipeline tool. If it is, I would need to ask artists what statistics would be useful to display.
 
 ## 3. Houdini HDA Version Control
 
