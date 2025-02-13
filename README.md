@@ -33,7 +33,6 @@ Here is a mockup:
 
 ![einkDisplay-mockup](./assets/einkDisplay-mockup.png)
 
-
 ## 3. Houdini HDA Version Control
 
 Managing Houdini Digital Assets (HDAs) is challenging due to the lack of built-in version control. Using Git for HDA versioning doesn't work well because HDAs are binary files (.hda/.otl), making it difficult for Git to track differences and merge changes effectively.
@@ -60,3 +59,31 @@ Here is a mockup:
 - **GitPython** or `subprocess` for Git automation.
 - **JSON or Houdini Metadata API** for storing commit information.
 * Figma has a Qt Bridge so would try to figure that out too
+
+## 4.  LEGO Asset Library & Asset Manager
+
+Develop a LEGO asset browser and library for Maya or Houdini to streamline asset retrieval, reuse, and organization for LEGO animation projects. The tool will provide a searchable, categorized asset database with drag-and-drop insertion into DCCs, supporting various LEGO file formats.
+
+- Centralized LEGO Asset Database
+    - Organizes LEGO pieces by brick type, minifigs, vehicles, etc.
+    - Allows tagging based on size, color, connection type, etc.
+
+- Drag & Drop Asset Insertion would be nice
+
+- LEGO Digital Designer (LDD) & Stud.io Compatibility
+    - Supports importing/exporting .ldr, .io, .obj, .fbx, or .usd LEGO models.
+    - Converts LEGO Digital Designer (LDD) and Stud.io models into a pipeline-ready format.
+
+- Metadata & Versioning (Potential Extension)
+    - Supports custom naming conventions for clean pipeline integration.
+    - Tracks different versions of LEGO assets to prevent inconsistencies --> possible extension if there's time
+
+- DCC Integration – Runs as a Python Panel inside Maya or Houdini.
+
+#### Potential Tech Stack for UI:
+- **Python** for core development
+- **SQLite/JSON** for asset metadata storage
+- **PySide2/PyQt** for UI
+- **PIL** (Python Imaging Library) for generating asset thumbnails
+- **PylDraw/BrickUtils** for LDD & Stud.io file parsing
+- **Maya cmds/Houdini hou** for DCC integration
