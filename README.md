@@ -33,34 +33,7 @@ Here is a mockup:
 
 ![einkDisplay-mockup](./assets/einkDisplay-mockup.png)
 
-## 3. Houdini HDA Version Control
-
-Managing Houdini Digital Assets (HDAs) is challenging due to the lack of built-in version control. Using Git for HDA versioning doesn't work well because HDAs are binary files (.hda/.otl), making it difficult for Git to track differences and merge changes effectively.
-
-This idea aims to implement a Git-like versioning system for HDAs, enabling automated tracking, commit history, and rollback functionality. By structuring HDAs into a Git-friendly format, artists and TDs can efficiently manage changes and revert to previous versions.
-
-- Automate HDA version tracking using Git.
-- Extract HDAs into a structured, text-based format for better diffing.
-- Log commit history when an HDA is modified.
-- Implement checkout and rollback functionality to restore previous versions.
-
-### Possible Extension: UI Integration
-To enhance usability, the project can be extended with a **Houdini Python Panel UI** using **PySide2 (Qt for Houdini)**. The UI would provide:
-- **Commit, Rollback, and History buttons** for easy interaction.
-- A **commit history panel** to browse previous versions.
-- **Status indicators** for tracking uncommitted changes.
-
-Here is a mockup:
-
-![HDAVerCtrl-mockup](./assets/HDAVerCtrl-mockup.png)
-
-#### Potential Tech Stack for UI:
-- **PySide2/PyQt** for Houdini’s Qt-based UI.
-- **GitPython** or `subprocess` for Git automation.
-- **JSON or Houdini Metadata API** for storing commit information.
-* Figma has a Qt Bridge so would try to figure that out too
-
-## 4.  LEGO Asset Library & Asset Manager
+## 3.  LEGO Asset Library & Asset Manager
 
 Develop a LEGO asset browser and library for Maya or Houdini to streamline asset retrieval, reuse, and organization for LEGO animation projects. The tool will provide a searchable, categorized asset database with drag-and-drop insertion into DCCs, supporting various LEGO file formats.
 
