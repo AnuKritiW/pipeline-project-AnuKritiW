@@ -1,5 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
-import psutil
+# import psutil
+import json
+import time
 
 # Try to import Inky library (only works on Raspberry Pi)
 try:
@@ -21,28 +23,38 @@ else:
 draw = ImageDraw.Draw(img)
 font = ImageFont.load_default()
 
-def get_system_stats():
-    return {
-        "CPU Usage": f"{psutil.cpu_percent()}%",
-        "RAM Usage": f"{psutil.virtual_memory().percent}%",
-        "Disk Usage": f"{psutil.disk_usage('/').percent}%"
-    }
+# def get_system_stats():
+#     return {
+#         "CPU Usage": f"{psutil.cpu_percent()}%",
+#         "RAM Usage": f"{psutil.virtual_memory().percent}%",
+#         "Disk Usage": f"{psutil.disk_usage('/').percent}%"
+#     }
+def get_pc_stats():
+    try:
+        with open("/home/pi/pipeline-project-AnuKritiW/out/pcstats.json", "r") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {"CPU Usage": "N/A", "RAM Usage": "N/A", "Disk Usage": "N/A"}
 
-# Fetch system stats
-stats = get_system_stats()
-print(stats)
+while True:
+    # Fetch system stats
+    # stats = get_system_stats()
+    stats = get_pc_stats()
+    print(stats)
 
-# Draw system stats
-y_offset = 10
-for key, value in stats.items():
-    draw.text((10, y_offset), f"{key}: {value}", fill=color, font=font)
-    y_offset += 20
+    # Draw system stats
+    y_offset = 10
+    for key, value in stats.items():
+        draw.text((10, y_offset), f"{key}: {value}", fill=color, font=font)
+        y_offset += 20
 
-if inky_display:
-    # Only update E-Ink if the hardware is available
-    inky_display.set_image(img)
-    inky_display.show()
-else:
-    # Save the image as a file for preview
-    img.save("eink_stats_output.png")
-    print("Saved simulated output to eink_stats_output.png")
+    if inky_display:
+        # Only update E-Ink if the hardware is available
+        inky_display.set_image(img)
+        inky_display.show()
+    else:
+        # Save the image as a file for preview
+        img.save("eink_stats_output.png")
+        print("Saved simulated output to eink_stats_output.png")
+
+    time.sleep(120)  # wait for a minute before updating again
