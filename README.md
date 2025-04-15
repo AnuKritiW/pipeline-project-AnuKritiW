@@ -1,23 +1,6 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/Tn7g_Mhz)
 
-# Pipeline Project Ideas
-
-## 1. VSCode plugin for VEX
-
-A plugin that gives API suggestions as you type into vscode.
-After deciding on the API, there is a parameter hint box that appears with the API description, argument help, etc.
-
-Here is a mockup:
-
-![extension-mockup](./assets/extension-mockup.png)
-
-![APISuggestions-mockup](./assets/APISuggestions-mockup.png)
-
-![APIHint-mockup](./assets/APIHint-mockup.png)
-
-If there is time,a VIM plugin can be an extension to the project.
-
-## 2. Companion e-ink display
+# Companion e-ink display
 
 This project aims to develop an E-Ink companion display that provides real-time, off-screen insights for users of Houdini or RenderMan. 
 
@@ -27,36 +10,93 @@ For RenderMan, the display will focus on render-specific metrics, including memo
 
 The device will offer a clean, always-on display that enhances workflow efficiency by surfacing important data not readily visible in the primary UI.
 
-**I'm not sure if this would be useful as a pipeline tool. If it is, I would need to ask artists what statistics would be useful to display -- ideally some useful stats from Houdini directly.**
-
 Here is a mockup:
 
 ![einkDisplay-mockup](./assets/einkDisplay-mockup.png)
 
-## 3.  LEGO Asset Library & Asset Manager
+## Set up notes
 
-Develop a LEGO asset browser and library for Maya or Houdini to streamline asset retrieval, reuse, and organization for LEGO animation projects. The tool will provide a searchable, categorized asset database with drag-and-drop insertion into DCCs, supporting various LEGO file formats.
+(Not polished yet; just adding it as I go along for now)
 
-- Centralized LEGO Asset Database
-    - Organizes LEGO pieces by brick type, minifigs, vehicles, etc.
-    - Allows tagging based on size, color, connection type, etc.
 
-- Drag & Drop Asset Insertion would be nice
+### 1. Flash Raspberry Pi OS and Configure
 
-- LEGO Digital Designer (LDD) & Stud.io Compatibility
-    - Supports importing/exporting .ldr, .io, .obj, .fbx, or .usd LEGO models.
-    - Converts LEGO Digital Designer (LDD) and Stud.io models into a pipeline-ready format.
+1. Download and open **Raspberry Pi Imager**.
+2. Choose:
+   - **OS**: Raspberry Pi OS (32-bit)
+   - **Storage**: Select your SD card
+3. Click the ⚙️ **Advanced Options**:
+   - ✔️ Set hostname: `pi`
+   - ✔️ Enable SSH (use password authentication)
+   - ✔️ Username: `pi`
+   - ✔️ Password: (set a password)
+   - ✔️ Configure Wi-Fi:
+     - SSID: (Type in the name of your wifi)
+     - Password: (your Wi-Fi password)
+     - Country: (your country)
+4. Click **Write** to flash the SD card.
 
-- Metadata & Versioning (Potential Extension)
-    - Supports custom naming conventions for clean pipeline integration.
-    - Tracks different versions of LEGO assets to prevent inconsistencies --> possible extension if there's time
+## 2. Manually Set Up Wi-Fi (If Needed)
 
-- DCC Integration – Runs as a Python Panel inside Maya or Houdini.
+If Wi-Fi does not connect on boot, do this:
 
-#### Potential Tech Stack for UI:
-- **Python** for core development
-- **SQLite/JSON** for asset metadata storage
-- **PySide2/PyQt** for UI
-- **PIL** (Python Imaging Library) for generating asset thumbnails
-- **PylDraw/BrickUtils** for LDD & Stud.io file parsing
-- **Maya cmds/Houdini hou** for DCC integration
+1. Insert SD card into your Mac.
+2. Open the **boot** partition (typically `/Volumes/bootfs` on macOS).
+3. Create a file named `wpa_supplicant.conf`. For example:
+
+   ```conf
+   country=GB
+   ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+   update_config=1
+
+   network={
+       ssid="wifi_name"
+       psk="your_wifi_password"
+       key_mgmt=WPA-PSK
+   }
+   ```
+4. Also create an empty file named `ssh` to enable SSH:
+    ```
+    touch /Volumes/bootfs/ssh
+    ```
+5. Eject the SD card and insert it into the Pi. Power it on.
+
+## 3. Connect to the Pi
+
+1. After ~1 min, SSH into the Pi:
+    ```
+    ssh pi@pi.local
+    # or use IP from `arp -a` or your router
+    ```
+    Password: (what you set earlier)
+
+### 4. Installing the Pimoroni Software (if needed)
+More [here](https://learn.pimoroni.com/article/getting-started-with-inky-phat)
+
+1. It's a great idea to start with a fresh install of Raspberry Pi OS or, if not, then make sure that you run `sudo apt update` and `sudo apt upgrade` in the terminal to get everything up-to-date.
+2. Run the following commands in the terminal:
+    ```
+    git clone https://github.com/pimoroni/inky
+    cd inky
+    ./install.sh # prompts to create a venv
+    ```
+3. Once that's all done, type `sudo reboot` to reboot your Pi and apply the changes to the Pi's interfaces.
+4. To enter the venev,
+    ```
+    source ~/.virtualenvs/pimoroni/bin/activate
+    ```
+
+### 5. Clone the Project Repo
+1. Once logged in:
+    ```
+    git clone git@github.com:NCCA/pipeline-project-AnuKritiW.git # May need to configure ssh cloning on github
+    cd pipeline-project-AnuKritiW/scripts
+    chmod +x sendstats.sh # makes an executable
+    ```
+
+### 6. Run the Script
+1. To test:
+    ```
+    ./sendstats.sh
+    ```
+    This should execute `stats.py`
