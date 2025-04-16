@@ -1,5 +1,5 @@
-from PIL import Image, ImageDraw, ImageFont
-# import psutil
+:%s/\s\+$//efrom PIL import Image, ImageDraw, ImageFont
+import datetime
 import json
 import time
 
@@ -11,17 +11,7 @@ except ImportError:
     print("[WARNING] Inky display not found. Running in simulation mode.")
     inky_display = None
 
-if inky_display:
-    img = Image.new("P", inky_display.resolution)  # Use palette mode e ink display
-    color = inky_display.RED
-    width, height = inky_display.width, inky_display.height
-else:
-    img = Image.new("RGB", (600, 448), "white") # Use full color mode in simulation
-    color = (255, 0, 0)
-    width, height = (600, 448)
-
-draw = ImageDraw.Draw(img)
-font = ImageFont.load_default()
+font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14)
 
 def get_pc_stats():
     try:
@@ -30,7 +20,7 @@ def get_pc_stats():
     except (FileNotFoundError, json.JSONDecodeError):
         return {"CPU Usage": "N/A", "RAM Usage": "N/A", "Disk Usage": "N/A"}
 
-def draw_bar(draw, x, y, percent, width=100, height=10, fill=color, bg=0):
+def draw_bar(draw, x, y, percent, width=100, height=10, fill=(255,0,0), bg=0):
     """Draws a horizontal bar with the given percentage (0–100)"""
     print(percent)
     draw.rectangle([x, y, x + width, y + height], outline=bg, fill=bg)
@@ -38,9 +28,20 @@ def draw_bar(draw, x, y, percent, width=100, height=10, fill=color, bg=0):
     draw.rectangle([x, y, x + filled, y + height], fill=fill)
 
 while True:
+    if inky_display:
+        img = Image.new("P", inky_display.resolution)  # Use palette mode e ink display
+        color = inky_display.RED
+        width, height = inky_display.width, inky_display.height
+    else:
+        img = Image.new("RGB", (600, 448), "white") # Use full color mode in simulation
+        color = (255, 0, 0)
+        width, height = (600, 448)
+
     # Fetch system stats
     stats = get_pc_stats()
     print(stats)
+
+    draw = ImageDraw.Draw(img)
 
     # Draw system stats
     y_offset = 10
@@ -53,7 +54,7 @@ while True:
         # Draw the label
         # draw.text((10, y_offset), f"{key}: {value}", fill=color, font=font)
         draw.text((10, y_offset), f"{key}:", fill=color, font=font)
-        y_offset += 12  # space after label
+        y_offset += 18  # space after label
 
         # Draw the loading bar
         bar_fill = inky_display.RED if inky_display else (255, 0, 0)
@@ -61,7 +62,10 @@ while True:
         draw_bar(draw, x=10, y=y_offset, percent=percent, width=120, height=10, fill=bar_fill, bg=bar_bg)
 
         draw.text((140, y_offset - 2), f"{value}", fill=color, font=font)
-        y_offset += 20  # space after bar
+        y_offset += 30  # space after bar
+
+    now = datetime.datetime.now().strftime("%H:%M:%S")
+    draw.text((10, y_offset), f"Updated: {now}", fill=bar_fill, font=font)
 
     if inky_display:
         # Only update E-Ink if the hardware is available
