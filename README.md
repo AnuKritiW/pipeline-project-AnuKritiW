@@ -7,6 +7,9 @@
 1. Retrieves System stats (CPU, RAM and Disk) from a Mac and updates the display every 2 minutes.
 ![einkDisplay-progress-1](./assets/einkDisplay-progress-1.jpeg)
 
+2. Displays a chosen reference image.
+![einkDisplay-image-progress-1](./assets/einkDisplay-image-progress-1.jpeg)
+
 2. Wrote a Flask web application that triggers scripts on the display
 ![webApp-progress-1](./assets/webApp-progress-1.png)
 
