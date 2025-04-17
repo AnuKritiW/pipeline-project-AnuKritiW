@@ -1,17 +1,22 @@
 <!doctype html>
 <html>
-  <head><title>E-Ink Display Control</title></head>
-  <body>
-    <h1>Select Profile</h1>
-    <form method="post">
-      <select name="profile">
-        {% for p in profiles %}
-          <option value="{{ p }}" {% if p == current %}selected{% endif %}>{{ p }}</option>
-        {% endfor %}
-      </select>
-      <button type="submit">Run</button>
+<head>
+  <title>PiPeline Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>PiPeline</h1>
+    <p class="subtitle">Select a profile to run</p>
+    <form method="POST" class="cards">
+      {% for key, profile in profiles.items() %}
+        <button type="submit" name="profile" value="{{ key }}" class="card">
+          <div class="icon">{{ profile.icon }}</div>
+          <div class="label">{{ profile.name }}</div>
+        </button>
+      {% endfor %}
     </form>
-    <p>Current Profile: <strong>{{ current }}</strong></p>
-  </body>
+  </div>
+</body>
 </html>
 
