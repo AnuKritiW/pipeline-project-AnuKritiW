@@ -2,6 +2,29 @@
 
 # Companion e-ink display
 
+## Progress notes
+
+1. Retrieves System stats (CPU, RAM and Disk) from a Mac and updates the display every 2 minutes.
+![einkDisplay-progress-1](./assets/einkDisplay-progress-1.jpeg)
+
+2. Wrote a Flask web application that triggers scripts on the display
+![webApp-progress-1](./assets/webApp-progress-1.png)
+
+TODO:
+
+Web-app:
+1. Polish UI for e-ink display
+2. Change main page buttons to navigate to profile-specific pages.
+3. Add a toggle button on profile pages to run or stop the associated script.
+4. Prevent duplicate processes by stopping any running script before starting a new one.
+5. Display a status card showing which script is currently running.
+
+eink display:
+1. Polish UI
+2. (wishlist) dynamic UI for profiles so users can select what information they would like displayed from the web app
+
+## Proposal (outdated)
+
 This project aims to develop an E-Ink companion display that provides real-time, off-screen insights for users of Houdini or RenderMan. 
 
 For Houdini, the display will show critical background information, such as memory usage, cache sizes, disk I/O, and live error tracking, helping users monitor system performance and identify bottlenecks while working. 
