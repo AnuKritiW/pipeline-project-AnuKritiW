@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head><title>E-Ink Display Control</title></head>
+  <body>
+    <h1>Select Profile</h1>
+    <form method="post">
+      <select name="profile">
+        {% for p in profiles %}
+          <option value="{{ p }}" {% if p == current %}selected{% endif %}>{{ p }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Run</button>
+    </form>
+    <p>Current Profile: <strong>{{ current }}</strong></p>
+  </body>
+</html>
+
