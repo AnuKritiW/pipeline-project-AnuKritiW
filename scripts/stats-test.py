@@ -1,4 +1,4 @@
-:%s/\s\+$//efrom PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 import datetime
 import json
 import time
