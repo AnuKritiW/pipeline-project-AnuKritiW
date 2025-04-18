@@ -6,9 +6,14 @@ inky = Inky()
 # TODO: add parameter on web app
 saturation = 0.5  # default
 
+# Get image path from command line
+if len(sys.argv) < 2:
+    print("Usage: python display-image.py <image-path>")
+    sys.exit(1)
+
+image_path = sys.argv[1]
+
 # Load image
-# image_path = "/home/pi/pipeline-project-AnuKritiW/assets/comicref-1.jpg"
-image_path = "/home/pi/pipeline-project-AnuKritiW/assets/grogu-ref.jpg"
 image = Image.open(image_path)
 
 # Resize to display resolution
