@@ -10,35 +10,38 @@
 2. Displays a chosen reference image.
 ![einkDisplay-image-progress-1](./assets/einkDisplay-image-progress-1.jpeg)
 
-2. Wrote a Flask web application that triggers scripts on the display
+3. Wrote a Flask web application. For now it has two profiles -- stats and images
 ![webApp-progress-1](./assets/webApp-progress-1.png)
+
+4. Stats
+
+More needs to be added here but for now it just as a run/stop toggle
+![webApp-statsprofilecard](./assets/einkDisplay-statsprofilecard-2.png)
+
+5. Image Display
+![webApp-imageprofilecard](./assets/einkDisplay-imageprofilecard-2.png)
 
 TODO:
 
 Web-app:
-1. Polish UI for e-ink display
-2. Change main page buttons to navigate to profile-specific pages.
-3. Add a toggle button on profile pages to run or stop the associated script.
-4. Prevent duplicate processes by stopping any running script before starting a new one.
+1. Polish UI
+2. ~~Change main page buttons to navigate to profile-specific pages.~~
+3. ~~Add a toggle button on profile pages to run or stop the associated script.~~
+    - If stats script is running, image profile page should not show 'current image' as active
+4. ~~Prevent duplicate processes by stopping any running script before starting a new one.~~
 5. Display a status card showing which script is currently running.
 
 eink display:
 1. Polish UI
 2. (wishlist) dynamic UI for profiles so users can select what information they would like displayed from the web app
 
-## Proposal (outdated)
+tests:
+1. ~~Add tests for app.py~~ (basic added)
+2. Add tests for scripts
+3. (wishlist) github actions
 
-This project aims to develop an E-Ink companion display that provides real-time, off-screen insights for users of Houdini or RenderMan. 
-
-For Houdini, the display will show critical background information, such as memory usage, cache sizes, disk I/O, and live error tracking, helping users monitor system performance and identify bottlenecks while working. 
-
-For RenderMan, the display will focus on render-specific metrics, including memory usage, disk I/O, and render performance details like texture memory usage and system bottlenecks. 
-
-The device will offer a clean, always-on display that enhances workflow efficiency by surfacing important data not readily visible in the primary UI.
-
-Here is a mockup:
-
-![einkDisplay-mockup](./assets/einkDisplay-mockup.png)
+Packaging:
+1. Write install script
 
 ## Set up notes
 
@@ -126,3 +129,19 @@ More [here](https://learn.pimoroni.com/article/getting-started-with-inky-phat)
     ./sendstats.sh
     ```
     This should execute `stats.py`
+
+
+
+## Proposal (outdated)
+
+This project aims to develop an E-Ink companion display that provides real-time, off-screen insights for users of Houdini or RenderMan. 
+
+For Houdini, the display will show critical background information, such as memory usage, cache sizes, disk I/O, and live error tracking, helping users monitor system performance and identify bottlenecks while working. 
+
+For RenderMan, the display will focus on render-specific metrics, including memory usage, disk I/O, and render performance details like texture memory usage and system bottlenecks. 
+
+The device will offer a clean, always-on display that enhances workflow efficiency by surfacing important data not readily visible in the primary UI.
+
+Here is a mockup:
+
+![einkDisplay-mockup](./assets/einkDisplay-mockup.png)
