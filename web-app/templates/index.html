@@ -10,10 +10,10 @@
     <p class="subtitle">Select a profile to run</p>
     <form method="POST" class="cards">
       {% for key, profile in profiles.items() %}
-        <button type="submit" name="profile" value="{{ key }}" class="card">
+        <a href="/profile/{{ key }}" class="card" style="text-decoration: none;">
           <div class="icon">{{ profile.icon }}</div>
           <div class="label">{{ profile.name }}</div>
-        </button>
+        </a>
       {% endfor %}
     </form>
   </div>

@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <title>Image Upload Plugin - PiPeline</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <a href="/" style="text-decoration:none;font-size:0.9rem">&larr; Back to Dashboard</a>
+    <h1>🖼️ Image Upload Plugin</h1>
+
+    <h3>Upload a New Image</h3>
+    <form method="POST" enctype="multipart/form-data">
+      <input type="file" name="image">
+      <button type="submit" name="action" value="upload">⬆ Upload</button>
+    </form>
+
+    {% if message %}
+    <p><em>{{ message }}</em></p>
+    {% endif %}
+
+    <h3>Now Showing</h3>
+    <p>{{ current_image if current_image else 'No image selected yet.' }}</p>
+
+    <h3>Uploaded Images</h3>
+    <table>
+      <thead>
+        <tr><th>Filename</th><th>Display</th><th>Delete</th></tr>
+      </thead>
+      <tbody>
+        {% for file in images %}
+        <tr>
+          <td>{{ file }}</td>
+          <td>
+            {% if file == current_image %}
+              ✅ Active
+            {% else %}
+              <form method="POST">
+                <input type="hidden" name="selected_image" value="{{ file }}">
+                <button type="submit" name="action" value="display">▶ Set</button>
+              </form>
+            {% endif %}
+          </td>
+          <td>
+            <form method="POST">
+              <input type="hidden" name="delete_image" value="{{ file }}">
+              <button type="submit" name="action" value="delete">🗑️ Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
+
