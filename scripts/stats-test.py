@@ -13,6 +13,13 @@ except ImportError:
 
 font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14)
 
+cpu_color   = (180, 255, 60)     # Lime green
+ram_color   = (255, 165, 0)      # Orange
+disk_color  = (0, 255, 255)      # Cyan
+time_color  = (120, 255, 120)    # Light green
+bar_bg      = (30, 30, 30)       # Dark grey background for bars
+bg_color    = (0, 0, 0)          # Black canvas background
+
 def get_pc_stats():
     try:
         with open("/home/pi/pipeline-project-AnuKritiW/out/pcstats.json", "r") as f:
@@ -20,7 +27,7 @@ def get_pc_stats():
     except (FileNotFoundError, json.JSONDecodeError):
         return {"CPU Usage": "N/A", "RAM Usage": "N/A", "Disk Usage": "N/A"}
 
-def draw_bar(draw, x, y, percent, width=100, height=10, fill=(255,0,0), bg=0):
+def draw_bar(draw, x, y, percent, width=100, height=10, fill=(255,0,0), bg=bg_color):
     """Draws a horizontal bar with the given percentage (0–100)"""
     print(percent)
     draw.rectangle([x, y, x + width, y + height], outline=bg, fill=bg)
@@ -29,11 +36,11 @@ def draw_bar(draw, x, y, percent, width=100, height=10, fill=(255,0,0), bg=0):
 
 while True:
     if inky_display:
-        img = Image.new("P", inky_display.resolution)  # Use palette mode e ink display
+        img = Image.new("RGB", inky_display.resolution)  # Use palette mode e ink display
         color = inky_display.RED
         width, height = inky_display.width, inky_display.height
     else:
-        img = Image.new("RGB", (600, 448), "white") # Use full color mode in simulation
+        img = Image.new("RGB", (600, 448), bg_color) # Use full color mode in simulation
         color = (255, 0, 0)
         width, height = (600, 448)
 
@@ -43,29 +50,37 @@ while True:
 
     draw = ImageDraw.Draw(img)
 
+    # Order of stats and their assigned colors
+    stat_keys = ["CPU Usage", "RAM Usage", "Disk Usage"]
+    stat_colors = [cpu_color, ram_color, disk_color]
+
     # Draw system stats
     y_offset = 10
-    for key, value in stats.items():
+
+    for i, key in enumerate(stat_keys):
+        value = stats.get(key, "N/A")
         try:
             percent = float(value.strip('%').strip())
         except:
             percent = 0
 
+        stat_color = stat_colors[i]
+
         # Draw the label
         # draw.text((10, y_offset), f"{key}: {value}", fill=color, font=font)
-        draw.text((10, y_offset), f"{key}:", fill=color, font=font)
+        draw.text((10, y_offset), f"{key}:", fill=stat_color, font=font)
         y_offset += 18  # space after label
 
         # Draw the loading bar
-        bar_fill = inky_display.RED if inky_display else (255, 0, 0)
-        bar_bg = inky_display.WHITE if inky_display else "white"
-        draw_bar(draw, x=10, y=y_offset, percent=percent, width=120, height=10, fill=bar_fill, bg=bar_bg)
+        # bar_fill = inky_display.RED if inky_display else (255, 0, 0)
+        # bar_bg = inky_display.WHITE if inky_display else "white"
+        draw_bar(draw, x=10, y=y_offset, percent=percent, width=120, height=10, fill=stat_color, bg=bar_bg)
 
-        draw.text((140, y_offset - 2), f"{value}", fill=color, font=font)
+        draw.text((140, y_offset - 2), f"{value}", fill=stat_color, font=font)
         y_offset += 30  # space after bar
 
     now = datetime.datetime.now().strftime("%H:%M:%S")
-    draw.text((10, y_offset), f"Updated: {now}", fill=bar_fill, font=font)
+    draw.text((10, y_offset), f"Updated: {now}", fill=time_color, font=font)
 
     if inky_display:
         # Only update E-Ink if the hardware is available
