@@ -20,14 +20,13 @@ font_header = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bo
 font_label  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_sz_label)  # "CPU Usage"
 font_value  = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_sz_value)  # "50.0%"
 
-# TODO: redo colours
 header_color = (255, 230, 0)     # Yellow
-cpu_color   = (180, 255, 60)     # Lime green
-ram_color   = (255, 165, 0)      # Orange
-disk_color  = (0, 255, 255)      # Cyan
-time_color  = (120, 255, 120)    # Light green
-bar_bg      = (255,255,255) # (30, 30, 30)       # Dark grey background for bars
-bg_color    = (0, 0, 0)          # Black canvas background
+cpu_color    = (51, 153, 255)    # Light blue
+ram_color    = (255, 153, 0)     # Orange
+disk_color   = (0, 255, 255)     # Cyan
+time_color   = (255, 255, 255)   # White
+bar_bg       = (255, 255, 255)   # White background for bars
+bg_color     = (0, 0, 0)         # Black canvas background
 
 def get_pc_stats():
     try:
