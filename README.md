@@ -5,7 +5,7 @@
 ## Progress notes
 
 1. Retrieves System stats (CPU, RAM and Disk) from a Mac and updates the display every 2 minutes.
-![einkDisplay-progress-1](./assets/einkDisplay-progress-1.jpeg)
+![einkDisplay-progress-2](./assets/einkDisplay-progress-2.jpeg)
 
 2. Displays a chosen reference image.
 ![einkDisplay-image-progress-1](./assets/einkDisplay-image-progress-1.jpeg)
