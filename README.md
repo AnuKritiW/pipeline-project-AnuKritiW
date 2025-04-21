@@ -11,15 +11,19 @@
 ![einkDisplay-image-progress-1](./assets/einkDisplay-image-progress-1.jpeg)
 
 3. Wrote a Flask web application. For now it has two profiles -- stats and images
-![webApp-progress-1](./assets/webApp-progress-1.png)
+![webApp-progress-1](./assets/webApp-HomePage.png)
 
-4. Stats
+4. When the web app is first run, the eink display automatically shows a splash screen
+
+![einkDisplay-splashscreen](./assets/einkDisplay-splashscreen.jpeg)
+
+5. Stats
 
 More needs to be added here but for now it just as a run/stop toggle
-![webApp-statsprofilecard](./assets/einkDisplay-statsprofilecard-2.png)
+![webApp-statsprofilecard](./assets/webApp-statsProfile.png)
 
-5. Image Display
-![webApp-imageprofilecard](./assets/einkDisplay-imageprofilecard-2.png)
+6. Image Display
+![webApp-imageprofilecard](./assets/webApp-ImageProfile.png)
 
 TODO:
 
@@ -29,11 +33,16 @@ Web-app:
 3. ~~Add a toggle button on profile pages to run or stop the associated script.~~
     - If stats script is running, image profile page should not show 'current image' as active
 4. ~~Prevent duplicate processes by stopping any running script before starting a new one.~~
-5. Display a status card showing which script is currently running.
+5. ~~Display a status card showing which script is currently running.~~
+6. Issue: when GPIO pins are in use, the UI still shows the script as having run though nothing happens on the display
+7. Ensure status card is updated when the script is first run
 
 eink display:
 1. Polish UI
 2. (wishlist) dynamic UI for profiles so users can select what information they would like displayed from the web app
+3. ~~Add intro page for when its initialised~~
+    - see if its possible to set up a name url for the <your-ip>:5000 situation
+4. TODO: check if mode "P" has a faster refresh rate than "RGB," in which case figure out how to use "P" for stats
 
 tests:
 1. ~~Add tests for app.py~~ (basic added)
@@ -46,7 +55,6 @@ Packaging:
 ## Set up notes
 
 (Not polished yet; just adding it as I go along for now)
-
 
 ### 1. Flash Raspberry Pi OS and Configure
 
@@ -130,8 +138,20 @@ More [here](https://learn.pimoroni.com/article/getting-started-with-inky-phat)
     ```
     This should execute `stats.py`
 
-
-
+## References
+- https://learn.pimoroni.com/article/getting-started-with-inky-phat#displaying-text-on-inky-phat
+- https://github.com/ryanwa18/spotipi-eink?tab=readme-ov-file
+- https://www.youtube.com/watch?v=d9forDotXkI&ab_channel=DavidZhang
+- https://github.com/fatihak/InkyPi
+- https://roboticsbackend.com/raspberry-pi-create-a-flask-server/#Minimal_code_structure
+- https://jinja.palletsprojects.com/en/stable/templates/
+- GPT use
+    - Generate initial HTML code blocks, which I then modified as needed
+    - Brainstorm and refine UI wording
+    - Understand Flask concepts more quickly
+        - evaluating Flask vs FastAPI vs other options
+        - Getting design recommendations for abstraction (e.g. Jinja inheritance)
+    - Debugging
 ## Proposal (outdated)
 
 This project aims to develop an E-Ink companion display that provides real-time, off-screen insights for users of Houdini or RenderMan. 
