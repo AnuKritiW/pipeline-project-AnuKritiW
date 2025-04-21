@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+<head>
+  <title>PiPeline</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+
+    <!-- 🟢 Status Card -->
+    <div class="status-card">
+      {% if current_profile %}
+        🟢 Currently Running: {{ current_profile }}
+        <form method="POST" style="display:inline">
+          <button type="submit" name="stop_global" value="1" style="margin-left: 1em;">⏹ Stop</button>
+        </form>
+      {% else %}
+        ⚪ No display is currently running
+      {% endif %}
+    </div>
+
+    <hr style="margin: 1em 0;">
+
+    {% block content %}{% endblock %}
+  </div>
+</body>
+</html>
+

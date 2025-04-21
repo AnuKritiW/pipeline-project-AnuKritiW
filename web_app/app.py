@@ -20,7 +20,11 @@ PROFILES = {
 # renders the home page using index.html
 @app.route("/")
 def index():
-    return render_template("index.html", profiles=PROFILES)
+    current_profile = ""
+    if os.path.exists("selected_profile.txt"):
+        with open("selected_profile.txt") as f:
+            current_profile = f.read().strip()
+    return render_template("index.html", profiles=PROFILES, current_profile=current_profile)
 
 # creates a generic profile page if no special profile has been created for it
 # GET checks if the profile exists, then redirects to the right profile
@@ -40,9 +44,12 @@ def profile_page(profile_key):
     message = ""
     running = False
 
+    current_profile = ""
     if os.path.exists("selected_profile.txt"):
         with open("selected_profile.txt") as f:
-            running = (f.read().strip() == profile_key)
+            current_profile = f.read().strip()
+            running = (current_profile == profile_key)
+            # running = (f.read().strip() == profile_key)
 
     if request.method == "POST":
         action = request.form.get("action")
@@ -61,7 +68,7 @@ def profile_page(profile_key):
             running = False
             message = f"{name} stopped."
 
-    return render_template("display-generic.html", profile_name=name, profile_key=profile_key, running=running, message=message)
+    return render_template("display-generic.html", profile_name=name, profile_key=profile_key, running=running, message=message, current_profile=current_profile)
 
 # specialised image profile page
 # GET loads current image name (if set) and lists all uploaded images
@@ -72,7 +79,7 @@ def profile_page(profile_key):
 def profile_image():
     # TODO: make all paths relative
     UPLOAD_FOLDER = "/home/pi/pipeline-project-AnuKritiW/uploads"
-    CURRENT_IMAGE_FILE = "/home/pi/pipeline-project-AnuKritiW/web-app/current_image.txt"
+    CURRENT_IMAGE_FILE = "/home/pi/pipeline-project-AnuKritiW/web_app/current_image.txt"
     DISPLAY_SCRIPT = "/home/pi/pipeline-project-AnuKritiW/scripts/display-image.py"
 
     message = ""
@@ -130,11 +137,26 @@ def profile_image():
     # List available images
     images = os.listdir(UPLOAD_FOLDER)
 
+    current_profile = ""
+    if os.path.exists("selected_profile.txt"):
+        with open("selected_profile.txt") as f:
+            current_profile = f.read().strip()
+
+    # Global stop handler (from status card)
+    if request.method == "POST" and request.form.get("stop_global"):
+        if current_profile and current_profile in PROFILES:
+            script_name = PROFILES[current_profile]["script"]
+            subprocess.Popen(["pkill", "-f", script_name])
+            open("selected_profile.txt", "w").close()
+            current_profile = ""
+            message = "Stopped current display."
+
     return render_template(
         "display-image.html",
         images=images,
         current_image=current_image,
-        message=message
+        message=message,
+        current_profile=current_profile
     )
 
 

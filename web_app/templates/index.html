@@ -1,22 +1,15 @@
-<!doctype html>
-<html>
-<head>
-  <title>PiPeline Dashboard</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  <div class="container">
-    <h1>PiPeline</h1>
-    <p class="subtitle">Select a profile to run</p>
-    <form method="POST" class="cards">
-      {% for key, profile in profiles.items() %}
-        <a href="/profile/{{ key }}" class="card" style="text-decoration: none;">
-          <div class="icon">{{ profile.icon }}</div>
-          <div class="label">{{ profile.name }}</div>
-        </a>
-      {% endfor %}
-    </form>
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>PiPeline</h1>
+  <p class="subtitle">Select a profile to run</p>
+  <div class="cards">
+    {% for key, profile in profiles.items() %}
+      <a href="/profile/{{ key }}" class="card" style="text-decoration: none;">
+        <div class="icon">{{ profile.icon }}</div>
+        <div class="label">{{ profile.name }}</div>
+      </a>
+    {% endfor %}
   </div>
-</body>
-</html>
+{% endblock %}
 

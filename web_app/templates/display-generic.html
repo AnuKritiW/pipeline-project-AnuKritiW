@@ -1,26 +1,19 @@
-<!doctype html>
-<html>
-<head>
-  <title>{{ profile_name }} - PiPeline</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-  <div class="container">
-    <a href="/" style="text-decoration:none;font-size:0.9rem">&larr; Back to Dashboard</a>
-    <h1>{{ profile_name }}</h1>
+{% extends "base.html" %}
 
-    {% if message %}
+{% block content %}
+  <a href="/" style="text-decoration:none;font-size:0.9rem">&larr; Back to Dashboard</a>
+  <h1>{{ profile_name }}</h1>
+
+  {% if message %}
     <p><em>{{ message }}</em></p>
-    {% endif %}
+  {% endif %}
 
-    <form method="POST">
-      {% if running %}
-        <button type="submit" name="action" value="stop">⏹ Stop Display</button>
-      {% else %}
-        <button type="submit" name="action" value="run">▶ Run Display</button>
-      {% endif %}
-    </form>
-  </div>
-</body>
-</html>
+  <form method="POST">
+    {% if running %}
+      <button type="submit" name="action" value="stop">⏹ Stop Display</button>
+    {% else %}
+      <button type="submit" name="action" value="run">▶ Run Display</button>
+    {% endif %}
+  </form>
+{% endblock %}
 
