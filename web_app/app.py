@@ -159,7 +159,20 @@ def profile_image():
         current_profile=current_profile
     )
 
+# clear files when script is interrupted
+def clear_session_files():
+    try:
+        open("selected_profile.txt", "w").close()
+    except Exception as e:
+        print(f"Error clearing selected_profile.txt: {e}")
+    try:
+        open("/home/pi/pipeline-project-AnuKritiW/web_app/current_image.txt", "w").close()
+    except Exception as e:
+        print(f"Error clearing current_image.txt: {e}")
+    print("Session files cleared.")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
-
+    try:
+        app.run(host="0.0.0.0", port=5000)
+    finally:
+        clear_session_files()
