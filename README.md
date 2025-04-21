@@ -20,6 +20,7 @@
 5. Stats
 
 More needs to be added here but for now it just as a run/stop toggle
+
 ![webApp-statsprofilecard](./assets/webApp-statsProfile.png)
 
 6. Image Display
