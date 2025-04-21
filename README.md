@@ -21,7 +21,7 @@
 
 More needs to be added here but for now it just as a run/stop toggle
 
-![webApp-statsprofilecard](./assets/webApp-statsProfile.png)
+![webApp-statsprofilecard](./assets/webApp-StatsProfile.png)
 
 6. Image Display
 ![webApp-imageprofilecard](./assets/webApp-ImageProfile.png)
