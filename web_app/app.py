@@ -173,6 +173,10 @@ def clear_session_files():
 
 if __name__ == "__main__":
     try:
+        subprocess.Popen([
+            "/home/pi/.virtualenvs/pimoroni/bin/python3",
+            "/home/pi/pipeline-project-AnuKritiW/scripts/splash_screen.py"
+        ])
         app.run(host="0.0.0.0", port=5000)
     finally:
         clear_session_files()
