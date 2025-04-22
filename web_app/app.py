@@ -67,6 +67,7 @@ def profile_page(profile_key):
             open("selected_profile.txt", "w").close()
             running = False
             message = f"{name} stopped."
+        return redirect(f"/profile/{profile_key}")
 
     return render_template("display-generic.html", profile_name=name, profile_key=profile_key, running=running, message=message, current_profile=current_profile)
 
