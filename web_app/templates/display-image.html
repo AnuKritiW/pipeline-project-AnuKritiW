@@ -25,7 +25,10 @@
     <tbody>
       {% for file in images %}
       <tr>
-        <td>{{ file }}</td>
+        <td>
+          <img src="{{ url_for('static', filename='uploads/' ~ file) }}" alt="{{ file }}" width="100"><br>
+          {{ file }}
+        </td>
         <td>
           {% if file == current_image %}
             ✅ Active

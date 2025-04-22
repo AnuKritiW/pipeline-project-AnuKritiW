@@ -79,7 +79,8 @@ def profile_page(profile_key):
 @app.route("/profile/image", methods=["GET", "POST"])
 def profile_image():
     # TODO: make all paths relative
-    UPLOAD_FOLDER = "/home/pi/pipeline-project-AnuKritiW/uploads"
+    # UPLOAD_FOLDER = "/home/pi/pipeline-project-AnuKritiW/uploads"
+    UPLOAD_FOLDER = os.path.join(app.root_path, "static/uploads")
     CURRENT_IMAGE_FILE = "/home/pi/pipeline-project-AnuKritiW/web_app/current_image.txt"
     DISPLAY_SCRIPT = "/home/pi/pipeline-project-AnuKritiW/scripts/display-image.py"
 
