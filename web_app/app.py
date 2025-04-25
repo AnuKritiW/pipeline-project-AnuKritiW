@@ -110,15 +110,20 @@ def profile_image():
         elif action == "display":
             filename = request.form.get("selected_image")
             image_path = os.path.join(UPLOAD_FOLDER, filename)
-            subprocess.Popen([
-                "/home/pi/.virtualenvs/pimoroni/bin/python3",
-                DISPLAY_SCRIPT,
-                image_path
-            ])
-            with open(CURRENT_IMAGE_FILE, "w") as f:
-                f.write(filename)
-            current_image = filename
-            message = f"Now displaying {filename}"
+
+            try:
+                subprocess.run([
+                    "/home/pi/.virtualenvs/pimoroni/bin/python3",
+                    DISPLAY_SCRIPT,
+                    image_path
+                ], check=True)  # check=True will raise CalledProcessError if fails
+                with open(CURRENT_IMAGE_FILE, "w") as f:
+                    f.write(filename)
+                current_image = filename
+                message = f"Now displaying {filename}"
+            except subprocess.CalledProcessError as e:
+                message = "Failed to display image. The display might be busy or another script is running."
+                # message = f"Failed to display image: {e}"
 
         # Delete selected image
         elif action == "delete":
