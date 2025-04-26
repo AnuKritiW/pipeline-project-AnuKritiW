@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>PiPeline</h1>
+  <p class="subtitle">Select a profile to run</p>
+  <div class="cards">
+    {% for key, profile in profiles.items() %}
+      <a href="/profile/{{ key }}" class="card" style="text-decoration: none;">
+        <div class="icon">{{ profile.icon }}</div>
+        <div class="label">{{ profile.name }}</div>
+      </a>
+    {% endfor %}
+  </div>
+{% endblock %}
+
