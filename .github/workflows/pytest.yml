@@ -1,0 +1,30 @@
+name: Run Pytest Tests
+
+on:
+  push:
+    branches: [ main, tests ]  # Run on pushes to main and tests branches
+  pull_request:
+    branches: [ main ]  # Run also on PRs into main branch
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-cov
+        pip install Flask
+
+    - name: Run tests
+      run: |
+        pytest --cov=web_app tests/
