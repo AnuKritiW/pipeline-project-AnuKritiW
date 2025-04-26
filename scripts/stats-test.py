@@ -7,9 +7,13 @@ import time
 try:
     from inky.auto import auto
     inky_display = auto()  # auto library, creates an instance of the class called inky_display
-except ImportError:
-    print("[WARNING] Inky display not found. Running in simulation mode.")
-    inky_display = None
+except Exception as e:
+    print(f"[ERROR] Failed to initialize Inky display: {e}", file=sys.stderr)
+    sys.exit(1)
+
+if inky_display is None:
+    print("[ERROR] Could not find Inky display. Exiting.", file=sys.stderr)
+    sys.exit(1)
 
 font_sz_header = 40
 font_sz_label = 32
@@ -37,7 +41,6 @@ def get_pc_stats():
 
 def draw_bar(draw, x, y, percent, width, height=font_sz_value, fill=(255,0,0), bg=bg_color):
     """Draws a horizontal bar with the given percentage (0–100)"""
-    # print(percent)
     draw.rectangle([x, y, x + width, y + height], outline=bg, fill=bg)
     filled = int((percent / 100) * width)
     draw.rectangle([x, y, x + filled, y + height], fill=fill)
@@ -46,13 +49,9 @@ while True:
     if inky_display:
         img = Image.new("RGB", inky_display.resolution)  # Use palette mode e ink display
         width, height = inky_display.width, inky_display.height
-    else:
-        img = Image.new("RGB", (600, 448), bg_color) # Use full color mode in simulation
-        width, height = (600, 448)
 
     # Fetch system stats
     stats = get_pc_stats()
-    # print(stats)
 
     draw = ImageDraw.Draw(img)
 
@@ -92,14 +91,17 @@ while True:
     now = datetime.datetime.now().strftime("%H:%M:%S")
     draw.text((10, y_offset), f"Updated: {now}", fill=time_color, font=font_label)
 
-    if inky_display:
+    try:
         # Only update E-Ink if the hardware is available
         inky_display.set_image(img)
+        print("TEST5")
         inky_display.show()
-    else:
-        # Save the image as a file for preview
-        img.save("eink_stats_output.png")
-        print("Saved simulated output to eink_stats_output.png")
+        print("TEST5b")
+    except Exception as e:
+        print("TEST6")
+        print(f"[ERROR] Failed to update Inky display: {e}", file=sys.stderr)
+        sys.exit(1)
 
+    print("TEST7")
     time.sleep(120)  # wait for a minute before updating again
 
