@@ -3,3 +3,4 @@
 /scripts/*.png
 /web_app/__pycache__/*
 /web_app/static/uploads
+tests/__pycache__/
