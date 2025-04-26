@@ -31,4 +31,86 @@ def test_image_page_get(client):
     assert response.status_code == 200
     assert b"Image Display" in response.data
 
-# to run `pytest tests/`
+from unittest.mock import patch, mock_open
+
+# test POST /profile/stats with "run" action
+@patch('web_app.app.subprocess.Popen')          # temporarily replace/mock subprocess.Popen
+@patch('builtins.open', new_callable=mock_open) # temporarily replace/mock open
+def test_profile_run_post(mock_open_file, mock_popen, client):
+    response = client.post("/profile/stats", data={"action": "run"}) # simulate submitting a POST request -- clicking 'Run'
+    assert response.status_code == 302                               # Should redirect
+    mock_popen.assert_called_once()
+    assert mock_open_file.call_count == 2
+
+# test POST /profile/stats with "stop" action
+# "Stop" button correctly calls pkill and clears the profile
+@patch('web_app.app.subprocess.Popen')
+@patch('builtins.open', new_callable=mock_open)
+def test_profile_stop_post(mock_open_file, mock_popen, client):
+    response = client.post("/profile/stats", data={"action": "stop"})
+    assert response.status_code == 302  # Should redirect
+    mock_popen.assert_called_once()
+    assert mock_open_file.call_count == 2
+
+import io
+
+# test POST /profile/image to upload an image
+@patch('web_app.app.os.makedirs')
+@patch('web_app.app.os.path.exists', return_value=True)
+@patch('web_app.app.os.listdir', return_value=["test.jpg"])
+def test_image_upload_valid(mock_listdir, mock_exists, mock_makedirs, client):
+    data = {
+        "action": "upload",
+        "image": (io.BytesIO(b"fake image data"), "test.jpg")
+    }
+    response = client.post("/profile/image", data=data, content_type='multipart/form-data')
+    assert response.status_code == 200
+    assert b"Uploaded" in response.data
+
+# test POST /profile/image to upload an invalid file
+@patch('web_app.app.os.makedirs')
+@patch('web_app.app.os.path.exists', return_value=True)
+@patch('web_app.app.os.listdir', return_value=["test.txt"])
+def test_image_upload_invalid_filetype(mock_listdir, mock_exists, mock_makedirs, client):
+    data = {
+        "action": "upload",
+        "image": (io.BytesIO(b"fake file data"), "test.txt")
+    }
+    response = client.post("/profile/image", data=data, content_type='multipart/form-data')
+    assert response.status_code == 200
+    assert b"Invalid file type" in response.data
+
+# test POST /profile/image to display an image
+@patch('web_app.app.subprocess.run')
+@patch('builtins.open', new_callable=mock_open)
+@patch('web_app.app.os.makedirs')
+@patch('web_app.app.os.path.exists', return_value=True)
+@patch('web_app.app.os.listdir', return_value=["test.jpg"])
+def test_image_display(mock_listdir, mock_exists, mock_makedirs, mock_open_file, mock_run, client):
+    data = {
+        "action": "display",
+        "selected_image": "test.jpg"
+    }
+    response = client.post("/profile/image", data=data)
+    assert response.status_code == 200
+    assert b"Now displaying" in response.data
+    mock_run.assert_called_once()
+    mock_open_file.assert_called()
+
+# test POST /profile/image to delete an image
+@patch('web_app.app.os.remove')
+@patch('builtins.open', new_callable=mock_open)
+@patch('web_app.app.os.makedirs')
+@patch('web_app.app.os.path.exists', return_value=True)
+@patch('web_app.app.os.listdir', return_value=["test.jpg"])
+def test_image_delete(mock_listdir, mock_exists, mock_makedirs, mock_open_file, mock_remove, client):
+    data = {
+        "action": "delete",
+        "delete_image": "test.jpg"
+    }
+    response = client.post("/profile/image", data=data)
+    assert response.status_code == 200
+    assert b"Deleted" in response.data
+    mock_remove.assert_called_once()
+
+# to run `pytest tests/``
