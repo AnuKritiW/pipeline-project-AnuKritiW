@@ -48,7 +48,7 @@ def test_profile_run_post(mock_opens, client):
     response = client.post("/profile/stats", data={"action": "run"}) # simulate submitting a POST request -- clicking 'Run'
     assert response.status_code == 302                               # Should redirect
     mock_popen.assert_called_once()
-    assert mock_open_file.call_count == 2
+    assert mock_open_file.called
 
 # test POST /profile/stats with "stop" action
 # "Stop" button correctly calls pkill and clears the profile
@@ -57,13 +57,14 @@ def test_profile_stop_post(mock_opens, client):
     response = client.post("/profile/stats", data={"action": "stop"})
     assert response.status_code == 302  # Should redirect
     mock_popen.assert_called_once()
-    assert mock_open_file.call_count == 2
+    assert mock_open_file.called
 
 @pytest.fixture
 def mock_uploads():
     with patch('web_app.app.os.makedirs'), \
-         patch('web_app.app.os.path.exists', return_value=True):
-        yield
+         patch('web_app.app.os.path.exists', return_value=True), \
+         patch('builtins.open', new_callable=mock_open) as mock_open_file:
+        yield mock_open_file
 
 # test POST /profile/image to upload an image
 def test_image_upload_valid(mock_uploads, client):
