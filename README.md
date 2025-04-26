@@ -30,20 +30,12 @@ TODO:
 
 Web-app:
 1. Polish UI
-2. ~~Change main page buttons to navigate to profile-specific pages.~~
-3. ~~Add a toggle button on profile pages to run or stop the associated script.~~
-    - If stats script is running, image profile page should not show 'current image' as active
-4. ~~Prevent duplicate processes by stopping any running script before starting a new one.~~
-5. ~~Display a status card showing which script is currently running.~~
-6. Issue: when GPIO pins are in use, the UI still shows the script as having run though nothing happens on the display
-7. Ensure status card is updated when the script is first run
+2. Issue: when GPIO pins are in use by splashscreen, the UI still shows the stats script as having run though nothing happens on the display
+3. see if its possible to set up a name url for the <your-ip>:5000 situation
 
 eink display:
 1. Polish UI
 2. (wishlist) dynamic UI for profiles so users can select what information they would like displayed from the web app
-3. ~~Add intro page for when its initialised~~
-    - see if its possible to set up a name url for the <your-ip>:5000 situation
-4. TODO: check if mode "P" has a faster refresh rate than "RGB," in which case figure out how to use "P" for stats
 
 tests:
 1. ~~Add tests for app.py~~ (basic added)
@@ -51,7 +43,7 @@ tests:
 3. (wishlist) github actions
 
 Packaging:
-1. Write install script
+1. Check install script
 
 ## Set up notes
 
@@ -107,6 +99,18 @@ If Wi-Fi does not connect on boot, do this:
     # or use IP from `arp -a` or your router
     ```
     Password: (what you set earlier)
+
+    (if using a phone hotspot, ensure the band is 2.4Ghz)
+
+    to prevent needing to input the pi password each time,
+    `ls ~/.ssh/id_rsa.pub` OR `ls ~/.ssh/id_ed25519.pub` (preferred)
+    if file exists, copy the key e.g. `ssh-copy-id -i ~/.ssh/id_ed25519.pub pi@pi.local`
+
+    if no file, `ssh-keygen -t ed25519 -C "your_email@example.com"`
+    and then copy the key `ssh-copy-id pi@pi.local`
+
+    and then test that no password is needed when `ssh pi@pi.local`
+
 
 ### 4. Installing the Pimoroni Software (if needed)
 More [here](https://learn.pimoroni.com/article/getting-started-with-inky-phat)
