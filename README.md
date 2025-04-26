@@ -143,6 +143,11 @@ More [here](https://learn.pimoroni.com/article/getting-started-with-inky-phat)
     ```
     This should execute `stats.py`
 
+## Testing notes
+
+on the pi, `pytest tests/`
+to test coverage, `pytest --cov=web_app tests/`
+
 ## References
 - https://learn.pimoroni.com/article/getting-started-with-inky-phat#displaying-text-on-inky-phat
 - https://github.com/ryanwa18/spotipi-eink?tab=readme-ov-file
