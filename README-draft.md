@@ -6,6 +6,16 @@
 
 The system is designed with flexibility in mind, allowing new profiles — such as render farm monitors or task-specific dashboards — to be easily added by pipeline engineers as production needs evolve.
 
+> ## Table of Contents:
+> - [Features](#features)
+> - [Required Hardware](#required-hardware)
+> - [Setting up the Pi](#setting-up-the-pi)
+> - [Installation](#installation)
+> - [Usage](#usage)
+> - [Testing](#testing)
+> - [Branching and PRs](#branching-and-prs)
+> - [References](#references)
+
 ## Features
 
 ## Required Hardware
