@@ -1,0 +1,22 @@
+@startuml
+title PiPeline Deployment Diagram
+
+actor User as "Artist/Developer"
+
+node "User Machine" {
+    artifact Browser
+}
+
+node "Raspberry Pi (Web Server)" {
+    artifact WebApp
+}
+
+node "E-Ink Display" {
+    artifact Display
+}
+
+User --> Browser : Uses
+Browser --> WebApp : HTTP Request
+WebApp --> Display : Render via GPIO/SPI 
+
+@enduml
