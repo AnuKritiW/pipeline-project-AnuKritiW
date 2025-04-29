@@ -149,29 +149,24 @@ on the pi, `pytest tests/`
 to test coverage, `pytest --cov=web_app tests/`
 
 ## References
-- https://learn.pimoroni.com/article/getting-started-with-inky-phat#displaying-text-on-inky-phat
-- https://github.com/ryanwa18/spotipi-eink?tab=readme-ov-file
-- https://www.youtube.com/watch?v=d9forDotXkI&ab_channel=DavidZhang
-- https://github.com/fatihak/InkyPi
-- https://roboticsbackend.com/raspberry-pi-create-a-flask-server/#Minimal_code_structure
-- https://jinja.palletsprojects.com/en/stable/templates/
-- GPT use
-    - Generate initial HTML code blocks, which I then modified as needed
-    - Brainstorm and refine UI wording
-    - Understand Flask concepts more quickly
-        - evaluating Flask vs FastAPI vs other options
-        - Getting design recommendations for abstraction (e.g. Jinja inheritance)
-    - Debugging
-## Proposal (outdated)
 
-This project aims to develop an E-Ink companion display that provides real-time, off-screen insights for users of Houdini or RenderMan. 
+Ak, F., 2025. *InkyPi*. Github. Available from: https://github.com/fatihak/InkyPi [Accessed 10 February 2025].
 
-For Houdini, the display will show critical background information, such as memory usage, cache sizes, disk I/O, and live error tracking, helping users monitor system performance and identify bottlenecks while working. 
+Pallets, 2024. *Template Designer Documentation*. Available from: https://jinja.palletsprojects.com/en/stable/templates/ [Accessed 21 April 2025].
 
-For RenderMan, the display will focus on render-specific metrics, including memory usage, disk I/O, and render performance details like texture memory usage and system bottlenecks. 
+Pimoroni, 2024. *Getting Started with Inky pHAT*. Available from: https://learn.pimoroni.com/article/getting-started-with-inky-phat#displaying-text-on-inky-phat [Accessed 15 March 2025].
 
-The device will offer a clean, always-on display that enhances workflow efficiency by surfacing important data not readily visible in the primary UI.
+The Robotics Back-End, 2024. *Raspberry Pi – Create a Flask Server*. Available from: https://roboticsbackend.com/raspberry-pi-create-a-flask-server/ [Accessed 16 April 2025].
 
-Here is a mockup:
+Ward, R., 2023. *spotipi-eink*. Github. Available from: https://github.com/ryanwa18/spotipi-eink?tab=readme-ov-file [Accessed 10 February 2025].
 
-![einkDisplay-mockup](./assets/einkDisplay-mockup.png)
+Zhang, D., 2024. *The E-ink Desk Accessory I've Always Wanted.* [video]. YouTube. Available from: https://www.youtube.com/watch?v=d9forDotXkI&ab_channel=DavidZhang [Accessed 10 February 2025]
+
+ChatGPT was used for
+* Generating initial HTML code templates, which were subsequently modified and adapted to project needs.
+* Brainstorming and refining UI wording.
+* Understanding Flask concepts more quickly, including:
+    * Evaluating Flask, FastAPI, and other backend frameworks to select the most suitable option.
+    * Getting design recommendations for abstraction (e.g. Jinja template inheritance)
+* Debugging and troubleshooting issues during development.
+* All suggestions provided by ChatGPT were critically reviewed and adapted as necessary to ensure correctness and alignment with the project requirements.
