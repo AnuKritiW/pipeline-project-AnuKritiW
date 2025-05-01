@@ -229,6 +229,14 @@ Feature branches and bug-fix branches were used consistently to ensure the `main
 
 ## References
 
+* Ak, F., 2025. *InkyPi*. Github. Available from: https://github.com/fatihak/InkyPi [Accessed 10 February 2025].
+* Ak, F., 2024. *Minimal E-Ink Clock with a Raspberry Pi (Tutorial)* [video]. YouTube. Available from: https://www.youtube.com/watch?v=L5PvQj1vfC4&ab_channel=AKZDev [Accessed 10 February 2025].
+* Pallets, 2024. *Template Designer Documentation*. Available from: https://jinja.palletsprojects.com/en/stable/templates/ [Accessed 21 April 2025].
+* Pimoroni, 2024. *Getting Started with Inky pHAT*. Available from: https://learn.pimoroni.com/article/getting-started-with-inky-phat#displaying-text-on-inky-phat [Accessed 15 March 2025].
+* The Robotics Back-End, 2024. *Raspberry Pi – Create a Flask Server*. Available from: https://roboticsbackend.com/raspberry-pi-create-a-flask-server/ [Accessed 16 April 2025].
+* Ward, R., 2023. *spotipi-eink*. Github. Available from: https://github.com/ryanwa18/spotipi-eink?tab=readme-ov-file [Accessed 10 February 2025].
+* Zhang, D., 2024. *The E-ink Desk Accessory I've Always Wanted.* [video]. YouTube. Available from: https://www.youtube.com/watch?v=d9forDotXkI&ab_channel=DavidZhang [Accessed 10 February 2025].
+
 ChatGPT was used for
 * Generating initial HTML code templates, which were subsequently modified and adapted to project needs.
 * Brainstorming and refining UI wording.
