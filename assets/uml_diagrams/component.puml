@@ -1,0 +1,26 @@
+@startuml
+title PiPeline Component Diagram
+
+actor User as "Artist/Developer"
+
+package "Client Side" {
+    [Browser]
+}
+
+package "Server Side (Web App)" {
+    [WebApp Controller] --> [HTML Templates] : Render Pages
+    [WebApp Controller] --> [Static Styling Assets] : Serve CSS
+    [WebApp Controller] --> [Scripts (utility scripts)] : Execute
+    [WebApp Controller] --> [Uploads (in-memory storage)]: Store Uploaded Files
+}
+
+package "View" {
+    [Display]
+}
+
+User --> Browser : Uses
+Browser --> [WebApp Controller] : HTTP Request
+[Scripts (utility scripts)] --> [Uploads (in-memory storage)] : Access
+[Scripts (utility scripts)] --> [Display] : Render via GPIO/SPI
+
+@enduml

@@ -1,0 +1,75 @@
+@startuml
+skinparam style strictuml
+
+title PiPeline Sequence Diagram: Set Image
+
+actor User as "Artist/Developer"
+
+box "Client Machine" #LightBlue
+participant Browser
+participant FileSystem as "File System"
+end box
+
+box "Raspberry Pi (Web Server)" #LightGreen
+participant WebApp as "WebApp Controller" <<Web Server>>
+participant Templates <<HTML>>
+participant StaticAssets <<CSS>>
+participant Uploads <<folder for images>>
+participant Scripts
+end box
+
+participant Display <<E-Ink Display>>
+
+User -> Browser : Clicks button (Select Profile)
+activate Browser
+Browser -> WebApp : HTTP Request
+deactivate Browser
+
+activate WebApp
+WebApp -> Templates : Render HTML Template
+Templates --> WebApp : //success//
+WebApp --> Browser : //HTML Response//
+deactivate WebApp
+
+activate Browser
+Browser -> StaticAssets : Request CSS (e.g., style.css)
+StaticAssets --> Browser : //CSS Response//
+deactivate Browser
+
+User -> Browser : Clicks button (e.g., "Select Image")
+activate User
+activate Browser
+Browser -> WebApp : HTTP Request (POST /select-image)
+
+activate WebApp
+WebApp -> FileSystem : Access File System
+User -> FileSystem : Select Image
+deactivate User
+
+FileSystem --> WebApp : Image Path
+deactivate WebApp
+WebApp --> Browser : //HTML Response//
+deactivate Browser
+
+User -> Browser : Clicks button (e.g., "Upload Image")
+activate Browser
+Browser -> WebApp : HTTP Request (POST /upload-image)
+WebApp -> Uploads : Store Uploaded Image
+Browser -> WebApp : //HTTP Response//
+deactivate Browser
+
+User -> Browser : Clicks button (e.g., "Set Image")
+activate Browser
+Browser -> WebApp : HTTP Request (POST /set-image)
+
+activate WebApp
+WebApp -> Scripts : Execute
+activate Scripts
+Scripts -> Uploads : Access Uploaded Images
+Scripts -> Display : Render Display (GPIO/SPI)
+destroy Scripts
+WebApp --> Browser : //HTML Response//
+deactivate Browser
+deactivate WebApp
+
+@enduml

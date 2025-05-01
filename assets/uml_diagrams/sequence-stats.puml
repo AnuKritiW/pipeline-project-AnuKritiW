@@ -1,0 +1,75 @@
+@startuml
+skinparam style strictuml
+
+title PiPeline Sequence Diagram: Stats Monitor
+
+actor User as "Artist/Developer"
+
+box "Client Machine" #LightBlue
+participant Terminal
+participant Browser
+end box
+
+box "Raspberry Pi" #LightGreen
+participant WebApp as "WebApp Controller" <<Web Server>>
+participant Templates <<HTML>>
+participant StaticAssets <<CSS>>
+participant Uploads <<stats.txt>>
+participant Scripts
+end box
+
+participant Display <<E-Ink Display>>
+
+User -> Terminal : Run sendstats.sh
+activate Terminal
+
+loop Every 2 minutes (Client Side)
+    Terminal -> Uploads : SSH - Update stats.txt
+end
+
+User -> Browser : Clicks button (Select Stats Profile)
+activate Browser
+Browser -> WebApp : HTTP Request
+deactivate Browser
+
+activate WebApp
+WebApp -> Templates : Render HTML Template
+Templates --> WebApp : //success//
+WebApp --> Browser : //HTML Response//
+deactivate WebApp
+
+activate Browser
+Browser -> StaticAssets : Request CSS (e.g., style.css)
+StaticAssets --> Browser : //CSS Response//
+deactivate Browser
+
+User -> Browser : Click button (e.g., "Set Stats")
+activate Browser
+Browser -> WebApp : HTTP Request (POST /set-stats)
+activate WebApp
+WebApp -> Scripts : Execute
+activate Scripts
+
+loop Every 2 minutes (Server Side)
+    Scripts -> Uploads : Read stats.txt
+    Scripts -> Display : Update Display (GPIO/SPI)
+end
+
+WebApp -> Browser : //HTML Response//
+deactivate WebApp
+deactivate Browser
+
+User -> Terminal : Ctrl+C (Stop sendstats.sh)
+destroy Terminal
+
+User -> Browser : Click button (e.g., "Stop Stats")
+activate Browser
+Browser -> WebApp : HTTP Request (POST /stop-monitor)
+activate WebApp
+WebApp -> Scripts : Send Stop Signal
+destroy Scripts
+WebApp --> Browser : //HTML Response//
+deactivate WebApp
+deactivate Browser
+
+@enduml
