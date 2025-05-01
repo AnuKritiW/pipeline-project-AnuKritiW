@@ -4,6 +4,7 @@ set -e  # Exit on any error
 
 echo "📦 Updating system..."
 sudo apt update && sudo apt upgrade -y
+sudo apt install -y expect
 
 cd ~
 echo "📁 Now in $(pwd)"
@@ -16,7 +17,17 @@ fi
 cd inky
 
 echo "🧪 Running Pimoroni's install.sh..."
-yes | ./install.sh
+expect <<EOF
+spawn ./install.sh
+expect "Would you like us to create and/or use a default one?"
+send "y\r"
+expect "Would you like to copy examples"
+send "y\r"
+expect "Would you like to install example dependencies"
+send "y\r"
+expect eof
+EOF
+# y | ./install.sh
 cd ..
 
 # echo "🔧 Installing Vim editor..."
