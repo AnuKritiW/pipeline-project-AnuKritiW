@@ -18,6 +18,21 @@ The system is designed with flexibility in mind, allowing new profiles — such 
 
 ## Features
 
+* Real-time System Monitor
+    * Displays live CPU, GPU, and memory usage from your developer machine, helping artists and TDs detect compute bottlenecks during rendering or heavy tasks.
+* Reference Image Viewer
+  *  Supports loading a reference image on the E-Ink display, useful for visual consistency or on-screen comparison while working.
+*  Modular Profile System (Extensible)
+   *  Designed with flexibility to support additional profiles — such as render farm status, task dashboards, or system alerts — with minimal configuration changes.
+* Automated Setup Scripts
+  * Includes install scripts (`install-mac.sh` and `install-pi.sh`) to streamline deployment.
+* Web-Based Control Panel
+  *  A lightweight Flask web app allows you to select the active display profile from any browser (currently tested with Safari).
+* Headless Operation
+   *  Set up over SSH without requiring a keyboard, mouse, or monitor for the Pi; SSH key authentication is supported.
+* Test Suite with Continuous Integration
+  *  Unit tests ensure reliability, with automatic execution via GitHub Actions.
+
 ## Required Hardware
 In addition to your developer machine (this project is mac-compatible so far), you would need the following:
 1. Raspberry Pi Zero 2 W
@@ -75,14 +90,30 @@ ssh-copy-id pi@pi.local
 ```
 After this, you should be able to SSH into your Pi without typing your password each time.
 
+### (Optional) Set Up SSH Key Authentication for Github
+On the pi,
+1. Check if you have an SSH key:
+```
+ls -al ~/.ssh
+```
+2. If you don't have one, generate it:
+```
+ssh-keygen -t ed25519 -C "git access for pi"
+```
+3. Copy the key:
+```
+cat ~/.ssh/id_ed25519.pub
+```
+4. [Set up a new key on Github](https://github.com/settings/ssh/new):
+
+
 ## Installation
 
 <!-- 1. Enable SPI and I2C under "Interface Options" with the command:
 ```
 sudo raspi-config
 ``` -->
-
-The steps below use installation scripts. If you prefer setting things up manually, see [Manual Setup Instructions](./assets/docs/manual-setup.md).
+<!-- TODO: The steps below use installation scripts. If you prefer setting things up manually, see [Manual Setup Instructions](./assets/docs/manual-setup.md). -->
 
 ### On Developer Machine
 
