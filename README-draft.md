@@ -122,8 +122,8 @@ sudo raspi-config
 ```
 git clone git@github.com:NCCA/pipeline-project-AnuKritiW.git
 cd pipeline-project-AnuKritiW
-chmod +x install-mac.sh
-./install-mac.sh
+chmod +x install/install-mac.sh
+./install/install-mac.sh
 ```
 
 ### On the Pi
@@ -145,11 +145,11 @@ sudo reboot
 
 ### On Developer Machine
 
-1. Run the stats script to send stats to the pi
+1. To send pc stats to the pi
 ```
-cd scripts
-chmod +x sendstats.sh
-./sendstats.sh
+source venv/bin/activate
+chmod +x scripts/sendstats.sh
+./scripts/sendstats.sh
 ```
 
 This script is a continuously running script that will send CPU usage, GPU usage and Memory usage to the pi every 2 minutes.
