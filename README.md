@@ -4,7 +4,7 @@
 - [ ] Testing/Github Actions to incorporate install scripts (?)
 - [ ] Fix bug on image profile page -- profile page no longer redirecting correctly to a successful state though image loads on the pi
 - [ ] Record Demo
-- [ ] Include screenshots + images of pi
+- [ ] Include updated screenshots + images of pi
 - [ ] Rename files (e.g. stats-test)
 - [ ] Make file paths relative
 - [ ] Clean up repository structure
@@ -23,6 +23,7 @@ The system is designed with flexibility in mind, allowing new profiles — such 
 > - [Installation](#installation)
 > - [Usage](#usage)
 > - [Testing](#testing)
+> - [Demo Images](#demo-images)
 > - [UML Diagrams](#uml-diagrams)
 > - [Branching and PRs](#branching-and-prs)
 > - [References](#references)
@@ -203,6 +204,17 @@ The workflow file is located at:
 ```
 .github/workflows/tests.yml
 ```
+
+## Demo Images
+
+| Feature Description                                                                            | Demo Image                                                                              |
+| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Wrote a Flask web application. It has two profiles -- stats and images.                        | ![webApp-progress-1](./assets/demo_images/webApp-HomePage.png)                          |
+| When the web app is first run, the eink display automatically shows a splash screen.           | ![einkDisplay-splashscreen](./assets/demo_images/einkDisplay-splashscreen.jpeg)         |
+| Stats profile view in web app.                                                                 | ![webApp-statsprofilecard](./assets/demo_images/webApp-StatsProfile.png)                |
+| Retrieves System stats (CPU, RAM and Disk) from a Mac and updates the display every 2 minutes. | ![einkDisplay-progress-2](./assets/demo_images/einkDisplay-progress-2.jpeg)             |
+| Image Display profile view in web app.                                                         | ![webApp-imageprofilecard](./assets/demo_images/webApp-ImageProfile.png)                |
+| Displays a chosen reference image.                                                             | ![einkDisplay-image-progress-1](./assets/demo_images/einkDisplay-image-progress-1.jpeg) |
 
 ## UML Diagrams
 
