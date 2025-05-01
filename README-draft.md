@@ -56,7 +56,7 @@ Before installing PiPeline, you need to prepare your Raspberry Pi by installing 
     Choose OS: Raspberry Pi OS (64-bit), or whatever is recommended
     Choose Storage: Select your MicroSD card
 4. After clicking `Next`, click `Edit Settings`.
-    * Set hostname (e.g., pi)
+    * Set hostname (e.g. pi)
     * Set username and password
     * Configure Wi-Fi (SSID, password, country)
     * Enable SSH
@@ -136,7 +136,7 @@ chmod +x install-pi.sh
 ./install-pi.sh
 ```
 
-2. Reboot the pi
+2. (If needed) Reboot the pi
 ```
 sudo reboot
 ```
@@ -156,16 +156,18 @@ This script is a continuously running script that will send CPU usage, GPU usage
 
 ### On the Pi
 
-1. On the pi, run the web app
-```
-cd pipeline-project-AnuKritiW/web_app
-python app.py
-```
-
-On Safari, visit `http://<ip>:5000`
+1. On Safari, visit `http://pi.local:5000`
 TODO: (On other browsers, some settings need to be changed to access)
 
 2. Choose the profile you would like to load up on the pi
+
+\* Some useful systemd commands
+```
+sudo systemctl stop pipeline-project.service    # to stop running
+sudo systemctl status pipeline-project.service  # confirm it has stopped running
+sudo systemctl start pipeline-project.service   # to start running
+sudo systemctl disable pipeline-project.service # Disable auto start on boot
+```
 
 ## Testing
 
