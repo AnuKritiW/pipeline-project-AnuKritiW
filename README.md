@@ -66,7 +66,7 @@ Packaging:
      - Country: (your country)
 4. Click **Write** to flash the SD card.
 
-## 2. Manually Set Up Wi-Fi (If Needed)
+### 2. Manually Set Up Wi-Fi (If Needed)
 
 If Wi-Fi does not connect on boot, do this:
 
@@ -91,7 +91,7 @@ If Wi-Fi does not connect on boot, do this:
     ```
 5. Eject the SD card and insert it into the Pi. Power it on.
 
-## 3. Connect to the Pi
+### 3. Connect to the Pi
 
 1. After ~1 min, SSH into the Pi:
     ```
