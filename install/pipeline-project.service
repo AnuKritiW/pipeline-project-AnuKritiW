@@ -1,0 +1,17 @@
+[Unit]
+Description=PiPeline Companion Eink Dashboard
+After=network.target
+
+[Service]
+User=root
+ExecStart=/usr/bin/python3 /home/pi/pipeline-project-AnuKritiW/web_app/app.py
+WorkingDirectory=/home/pi/pipeline-project-AnuKritiW/web_app
+StandardOutput=journal
+StandardError=journal
+Restart=on-failure
+RestartSec=15
+KillSignal=SIGINT
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
