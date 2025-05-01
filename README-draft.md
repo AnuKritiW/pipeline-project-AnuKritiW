@@ -1,5 +1,15 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/Tn7g_Mhz)
 
+#### TODOs (as of 1/5):
+- [ ] Testing/Github Actions to incorporate install scripts (?)
+- [ ] Fix bug on image profile page -- profile page no longer redirecting correctly to a successful state though image loads on the pi
+- [ ] Record Demo
+- [ ] Include screenshots + images of pi
+- [ ] Rename files (e.g. stats-test)
+- [ ] Make file paths relative
+- [ ] Clean up repository structure
+<br><br>
+
 # PiPeline - a companion e-ink display to assist artists
 
 `PiPeline` is a lightweight, always-on companion display designed to support artists and technical directors during production workflows. It provides real-time system statistics to help quickly identify compute-heavy bottlenecks, alongside a customizable reference image display. By offering critical information and visual guidance at a glance, `PiPeline` enhances studio efficiency without disrupting the artist's main workspace.
@@ -13,6 +23,7 @@ The system is designed with flexibility in mind, allowing new profiles — such 
 > - [Installation](#installation)
 > - [Usage](#usage)
 > - [Testing](#testing)
+> - [UML Diagrams](#uml-diagrams)
 > - [Branching and PRs](#branching-and-prs)
 > - [References](#references)
 
@@ -192,6 +203,20 @@ The workflow file is located at:
 ```
 .github/workflows/tests.yml
 ```
+
+## UML Diagrams
+
+### Component Diagram
+
+![component-diagram](./assets/uml_diagrams/component.png)
+
+### Deployment Diagram
+
+![deployment-diagram](./assets/uml_diagrams/deployment.png)
+
+### Sequence Diagram
+
+![sequence-diagram](./assets/uml_diagrams/sequence-stats.png)
 
 ## Branching and PRs
 
