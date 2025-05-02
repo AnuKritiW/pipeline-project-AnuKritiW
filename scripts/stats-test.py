@@ -2,6 +2,8 @@ from PIL import Image, ImageDraw, ImageFont
 import datetime
 import json
 import time
+import os
+import subprocess
 
 # Try to import Inky library (only works on Raspberry Pi)
 try:
@@ -94,14 +96,14 @@ while True:
     try:
         # Only update E-Ink if the hardware is available
         inky_display.set_image(img)
-        print("TEST5")
         inky_display.show()
-        print("TEST5b")
+
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        clear_script = os.path.join(script_dir, 'clear_image_info.py')
+        subprocess.run(['python3', clear_script])
     except Exception as e:
-        print("TEST6")
         print(f"[ERROR] Failed to update Inky display: {e}", file=sys.stderr)
         sys.exit(1)
 
-    print("TEST7")
     time.sleep(120)  # wait for a minute before updating again
 

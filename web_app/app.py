@@ -18,12 +18,21 @@ PROFILES = {
 }
 
 # renders the home page using index.html
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
     current_profile = ""
     if os.path.exists("selected_profile.txt"):
         with open("selected_profile.txt") as f:
             current_profile = f.read().strip()
+
+    if request.method == "POST" and request.form.get("stop_global"):
+        if current_profile and current_profile in PROFILES:
+            script_name = PROFILES[current_profile]["script"]
+            subprocess.Popen(["pkill", "-f", script_name])
+            open("selected_profile.txt", "w").close()
+            current_profile = ""
+        return redirect("/") 
+    
     return render_template("index.html", profiles=PROFILES, current_profile=current_profile)
 
 # creates a generic profile page if no special profile has been created for it
@@ -52,6 +61,14 @@ def profile_page(profile_key):
             # running = (f.read().strip() == profile_key)
 
     if request.method == "POST":
+        if request.form.get("stop_global"):
+            if current_profile and current_profile in PROFILES:
+                script_name = PROFILES[current_profile]["script"]
+                subprocess.Popen(["pkill", "-f", script_name])
+                open("selected_profile.txt", "w").close()
+                current_profile = ""
+            return redirect(f"/profile/{profile_key}")
+
         action = request.form.get("action")
         if action == "run":
             subprocess.Popen([

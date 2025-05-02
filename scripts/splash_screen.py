@@ -1,5 +1,7 @@
 from inky.auto import auto
 from PIL import Image, ImageFont, ImageDraw
+import os
+import subprocess
 
 def show_pipeline_splash():
     inky_display = auto()
@@ -39,5 +41,10 @@ def show_pipeline_splash():
     # Display image
     inky_display.set_image(img)
     inky_display.show()
+
+    # clear current_image.txt
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    clear_script = os.path.join(script_dir, 'clear_image_info.py')
+    subprocess.run(['python3', clear_script])
 
 show_pipeline_splash()
