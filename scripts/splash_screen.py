@@ -18,7 +18,7 @@ def show_pipeline_splash():
         font_instruction = ImageFont.load_default()
 
     title = "PiPeline"
-    instruction = "Go to http://<your-ip>:5000\nto run a profile"
+    instruction = "Go to http://pi.local:5000\nto run a profile"
 
     w_title, h_title = draw.textsize(title, font=font_title)
     w_instr, h_instr = draw.textsize(instruction, font=font_instruction)
