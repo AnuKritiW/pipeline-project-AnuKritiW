@@ -60,23 +60,33 @@ h1, h3 {
 
 /* ====== Buttons ====== */
 
-button {
+.btn {
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
   border: none;
-  background-color: #4CAF50;
   color: white;
   cursor: pointer;
   font-size: 0.9rem;
 }
-button:hover {
+
+.btn-green {
+  background-color: #4CAF50;
+}
+.btn-green:hover {
   background-color: #45a049;
 }
-.custom-file-btn {
-  background-color: #1976d2;
+
+.btn-red {
+  background-color: #E74C3C;
+}
+.btn-red:hover {
+  background-color: #C0392B;
 }
 
-.custom-file-btn:hover {
+.btn-blue {
+  background-color: #1976d2;
+}
+.btn-blue:hover {
   background-color: #1565c0;
 }
 

@@ -12,7 +12,7 @@
       {% if current_profile %}
         🟢 Currently Running: {{ current_profile }}
         <form method="POST" style="display:inline">
-          <button type="submit" name="stop_global" value="1" style="margin-left: 1em;">⏹ Stop</button>
+          <button type="submit" class="btn btn-red" name="stop_global" value="1" style="margin-left: 1em;">⏹ Stop</button>
         </form>
       {% else %}
         ⚪ No display is currently running

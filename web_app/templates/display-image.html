@@ -8,11 +8,11 @@
     <div class="file-input-wrapper">
       <label>
 	<input type="file" name="image" id="fileInput" style="display:none;" onchange="document.getElementById('filename').innerText = this.files[0]?.name || 'No file selected';">
-        <button type="button" class="custom-file-btn" onclick="document.getElementById('fileInput').click();">Choose File</button>
+        <button type="button" class="btn btn-blue" onclick="document.getElementById('fileInput').click();">Choose File</button>
         <span id="filename">No file selected</span>
       </label>
       <span id="filename">No file selected</span>
-      <button type="submit" name="action" value="upload">⬆ Upload</button>
+      <button type="submit" class="btn btn-green" name="action" value="upload">⬆ Upload</button>
     </div>
     <p style="font-size:0.8rem;color:#777;">Accepted formats: JPG, PNG. Max size: 5MB.</p>
   </form>
@@ -52,14 +52,14 @@
           {% else %}
             <form method="POST">
               <input type="hidden" name="selected_image" value="{{ file }}">
-              <button type="submit" name="action" value="display">▶ Set</button>
+              <button type="submit" class="btn btn-green" name="action" value="display">▶ Set</button>
             </form>
           {% endif %}
         </td>
         <td>
           <form method="POST" onsubmit="return confirm('Are you sure you want to delete {{ file }}?');">
             <input type="hidden" name="delete_image" value="{{ file }}">
-            <button type="submit" name="action" value="delete">🗑️ Delete</button>
+            <button type="submit" class="btn btn-red" name="action" value="delete">🗑️ Delete</button>
           </form>
         </td>
       </tr>
