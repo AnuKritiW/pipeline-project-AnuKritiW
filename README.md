@@ -2,9 +2,9 @@
 
 #### TODOs (as of 1/5):
 - [ ] Testing/Github Actions to incorporate install scripts (?)
-- [ ] Fix bug on image profile page -- profile page no longer redirecting correctly to a successful state though image loads on the pi
+- [x] Fix bug on image profile page -- profile page no longer redirecting correctly to a successful state though image loads on the pi
 - [ ] Record Demo
-- [ ] Include updated screenshots + images of pi
+- [x] Include updated screenshots + images of pi
 - [ ] Rename files (e.g. stats-test)
 - [ ] Make file paths relative
 - [ ] Clean up repository structure
@@ -179,6 +179,7 @@ sudo systemctl stop pipeline-project.service    # to stop running
 sudo systemctl status pipeline-project.service  # confirm it has stopped running
 sudo systemctl start pipeline-project.service   # to start running
 sudo systemctl disable pipeline-project.service # Disable auto start on boot
+sudo systemctl enable pipeline-project.service  # Enable auto start on boot
 ```
 
 ## Testing
