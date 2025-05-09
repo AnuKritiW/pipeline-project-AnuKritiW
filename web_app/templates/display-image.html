@@ -1,13 +1,20 @@
 {% extends "base.html" %}
-
 {% block content %}
   <a href="/" style="text-decoration:none;font-size:0.9rem">&larr; Back to Dashboard</a>
   <h1>🖼️ Image Display</h1>
 
   <h3>Upload a New Image</h3>
   <form method="POST" enctype="multipart/form-data">
-    <input type="file" name="image">
-    <button type="submit" name="action" value="upload">⬆ Upload</button>
+    <div class="file-input-wrapper">
+      <label>
+	<input type="file" name="image" id="fileInput" style="display:none;" onchange="document.getElementById('filename').innerText = this.files[0]?.name || 'No file selected';">
+        <button type="button" class="btn btn-blue" onclick="document.getElementById('fileInput').click();">Choose File</button>
+        <span id="filename">No file selected</span>
+      </label>
+      <span id="filename">No file selected</span>
+      <button type="submit" class="btn btn-green" name="action" value="upload">⬆ Upload</button>
+    </div>
+    <p style="font-size:0.8rem;color:#777;">Accepted formats: JPG, PNG. Max size: 5MB.</p>
   </form>
 
   {% if message %}
@@ -15,7 +22,14 @@
   {% endif %}
 
   <h3>Now Showing</h3>
-  <p>{{ current_image if current_image else 'No image selected yet.' }}</p>
+  {% if current_image %}
+    <div class="current-image">
+      <img src="{{ url_for('static', filename='uploads/' ~ current_image) }}" alt="{{ current_image }}" width="200">
+      <p><strong>{{ current_image }}</strong></p>
+    </div>
+  {% else %}
+    <p>No image selected yet.</p>
+  {% endif %}
 
   <h3>Uploaded Images</h3>
   <table>
@@ -26,7 +40,10 @@
       {% for file in images %}
       <tr>
         <td>
-          <img src="{{ url_for('static', filename='uploads/' ~ file) }}" alt="{{ file }}" width="100"><br>
+          <a href="{{ url_for('static', filename='uploads/' ~ file) }}" target="_blank">
+            <img src="{{ url_for('static', filename='uploads/' ~ file) }}" alt="{{ file }}" width="120"
+              {% if file == current_image %}class="active-img"{% endif %}>
+          </a><br>
           {{ file }}
         </td>
         <td>
@@ -35,14 +52,14 @@
           {% else %}
             <form method="POST">
               <input type="hidden" name="selected_image" value="{{ file }}">
-              <button type="submit" name="action" value="display">▶ Set</button>
+              <button type="submit" class="btn btn-green" name="action" value="display">▶ Set</button>
             </form>
           {% endif %}
         </td>
         <td>
-          <form method="POST">
+          <form method="POST" onsubmit="return confirm('Are you sure you want to delete {{ file }}?');">
             <input type="hidden" name="delete_image" value="{{ file }}">
-            <button type="submit" name="action" value="delete">🗑️ Delete</button>
+            <button type="submit" class="btn btn-red" name="action" value="delete">🗑️ Delete</button>
           </form>
         </td>
       </tr>

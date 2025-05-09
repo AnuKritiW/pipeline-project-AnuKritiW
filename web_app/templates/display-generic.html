@@ -10,9 +10,9 @@
 
   <form method="POST">
     {% if running %}
-      <button type="submit" name="action" value="stop">⏹ Stop Display</button>
+      <button type="submit" name="action" value="stop" class="btn btn-red">⏹ Stop Display</button>
     {% else %}
-      <button type="submit" name="action" value="run">▶ Run Display</button>
+      <button type="submit" name="action" value="run" class="btn btn-green">▶ Run Display</button>
     {% endif %}
   </form>
 {% endblock %}

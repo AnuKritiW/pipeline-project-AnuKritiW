@@ -3,6 +3,7 @@ body {
   background: #f6f7fb;
   margin: 0;
   padding: 2rem;
+  color: #333;
 }
 
 .container {
@@ -14,8 +15,8 @@ body {
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 
-h1 {
-  font-size: 2rem;
+h1, h3 {
+  font-size: 2rem; /*keeps h1 at 2rem; h3 will inherit browser default size*/
   margin-bottom: 0.5rem;
 }
 
@@ -57,3 +58,87 @@ h1 {
   font-weight: bold;
 }
 
+/* ====== Buttons ====== */
+
+.btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-green {
+  background-color: #4CAF50;
+}
+.btn-green:hover {
+  background-color: #45a049;
+}
+
+.btn-red {
+  background-color: #E74C3C;
+}
+.btn-red:hover {
+  background-color: #C0392B;
+}
+
+.btn-blue {
+  background-color: #1976d2;
+}
+.btn-blue:hover {
+  background-color: #1565c0;
+}
+
+/* ====== Table styles ====== */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+th, td {
+  padding: 0.75rem;
+  text-align: center;
+  vertical-align: top;
+}
+
+th {
+  background-color: #e0e0e0;
+  font-weight: bold;
+}
+
+td img {
+  border-radius: 8px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+td img:hover {
+  transform: scale(1.2);
+}
+
+/* ====== Image Display Page ====== */
+.active-img {
+  border: 3px solid #4CAF50;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.current-image {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.current-image img {
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.2);
+}
+
+.file-input-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
