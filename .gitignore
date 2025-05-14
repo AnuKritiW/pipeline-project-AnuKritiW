@@ -5,3 +5,4 @@
 /web_app/static/uploads
 tests/__pycache__/
 uml/
+/web_app/data/renderfarm_filter.json
