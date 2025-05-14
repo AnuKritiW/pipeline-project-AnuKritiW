@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect
 import subprocess
 import os
+import json
+import time
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -14,7 +16,12 @@ PROFILES = {
         "name": "Image Display",
         "icon": "🖼️",
         "script": "display-image.py"
-    }
+    },
+    "renderfarm": {
+        "name": "Renderfarm Monitor",
+        "icon": "🧮",
+        "script": "display_renderfarm_monitor.py"
+    },
 }
 
 # renders the home page using index.html
@@ -31,8 +38,8 @@ def index():
             subprocess.Popen(["pkill", "-f", script_name])
             open("selected_profile.txt", "w").close()
             current_profile = ""
-        return redirect("/") 
-    
+        return redirect("/")
+
     return render_template("index.html", profiles=PROFILES, current_profile=current_profile)
 
 # creates a generic profile page if no special profile has been created for it
@@ -47,6 +54,8 @@ def profile_page(profile_key):
 
     if profile_key == "image":
         return redirect("/profile/image")
+    elif profile_key == "renderfarm":
+        return redirect("/profile/renderfarm")
 
     script = PROFILES[profile_key]["script"]
     name = PROFILES[profile_key]["name"]
@@ -181,6 +190,85 @@ def profile_image():
         current_image=current_image,
         message=message,
         current_profile=current_profile
+    )
+
+@app.route("/profile/renderfarm", methods=["GET", "POST"])
+def profile_renderfarm():
+    name = PROFILES["renderfarm"]["name"]
+    message = ""
+    running = False
+    data_dir = os.path.join(app.root_path, "data")
+
+    # Load current profile
+    current_profile = ""
+    if os.path.exists("selected_profile.txt"):
+        with open("selected_profile.txt") as f:
+            current_profile = f.read().strip()
+            running = (current_profile == "renderfarm")
+
+    if request.method == "POST":
+        script_name = PROFILES["renderfarm"]["script"]
+        script_path = f"/home/pi/pipeline-project-AnuKritiW/scripts/{script_name}"
+
+        if request.form.get("action") == "run":
+            subprocess.Popen([
+                "/home/pi/.virtualenvs/pimoroni/bin/python3",
+                script_path
+            ])
+            with open("selected_profile.txt", "w") as f:
+                f.write("renderfarm")
+            running = True
+            message = f"{name} started."
+            return redirect("/profile/renderfarm")
+
+        elif request.form.get("action") == "stop":
+            subprocess.Popen(["pkill", "-f", script_name])
+            open("selected_profile.txt", "w").close()
+            running = False
+            message = f"{name} stopped."
+            return redirect("/profile/renderfarm")
+
+        elif request.form.get("action") == "update_filter":
+            user = request.form.get("filter_user", "").strip()
+            project = request.form.get("filter_project", "").strip()
+            status = request.form.get("filter_status", "").strip()
+
+            filter_data = {
+                "user": user,
+                "project": project,
+                "status": status
+            }
+
+            filter_path = os.path.join(data_dir, 'renderfarm_filter.json')
+            with open(filter_path, "w") as f:
+                json.dump(filter_data, f, indent=2)
+
+            # restart the display script so it refreshes immediately
+            subprocess.Popen(["pkill", "-f", script_name])
+            time.sleep(1)
+            subprocess.Popen([
+                "/home/pi/.virtualenvs/pimoroni/bin/python3",
+                script_path
+            ])
+
+            message = "Filter updated."
+            return redirect("/profile/renderfarm")
+
+    with open(os.path.join(data_dir, 'renderfarm_status.json')) as f:
+        jobs = json.load(f)
+
+    users = sorted(set(job['user'] for job in jobs))
+    projects = sorted(set(job['project'] for job in jobs))
+
+    return render_template(
+        "display-renderfarm.html",
+        profile_name=name,
+        profile_key="renderfarm",
+        running=running,
+        message=message,
+        current_profile=current_profile,
+        users=users,
+        projects=projects
     )
 
 # clear files when script is interrupted
