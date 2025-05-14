@@ -4,7 +4,7 @@
     "user": "anu",
     "project": "cosmic-journey",
     "shot": "sh045",
-    "frames": "200–215",
+    "frames": "200-215",
     "status": "rendering",
     "tool": "RenderMan",
     "progress": 45
@@ -14,7 +14,7 @@
     "user": "marie",
     "project": "deep-sea",
     "shot": "sh010",
-    "frames": "100–120",
+    "frames": "100-120",
     "status": "waiting",
     "tool": "Redshift",
     "progress": 0
@@ -24,7 +24,7 @@
     "user": "anu",
     "project": "deep-sea",
     "shot": "sh012",
-    "frames": "121–140",
+    "frames": "121-140",
     "status": "done",
     "tool": "Redshift",
     "progress": 100
