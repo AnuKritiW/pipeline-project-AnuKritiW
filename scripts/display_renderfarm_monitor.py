@@ -2,13 +2,12 @@ from inky.auto import auto
 from PIL import Image, ImageDraw, ImageFont
 import os
 import json
+import time
 
 def display_render_farm():
     # setup display
     inky_display = auto()
     inky_display.set_border(inky_display.WHITE)
-    img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT), color=inky_display.WHITE)
-    draw = ImageDraw.Draw(img)
 
     # Load fonts
     # TODO: Make fonts larger
@@ -25,49 +24,56 @@ def display_render_farm():
     jobs_file = os.path.join(data_dir, 'renderfarm_status.json')
     filter_file = os.path.join(data_dir, 'renderfarm_filter.json')
 
-    # load jobs and filter
-    with open(jobs_file) as jf:
-        jobs = json.load(jf)
+    while True:
+        print("LOOP")
+        img = Image.new("P", (inky_display.WIDTH, inky_display.HEIGHT), color=inky_display.WHITE)
+        draw = ImageDraw.Draw(img)
 
-    with open(filter_file) as ff:
-        filters = json.load(ff)
+        # load jobs and filter
+        with open(jobs_file) as jf:
+            jobs = json.load(jf)
 
-    filtered_jobs = []
-    for job in jobs:
-        match = True
-        for key in ['user', 'project', 'status']:
-            if filters.get(key) and job.get(key) != filters[key]:
-                match = False
-                break
-        if match:
-            filtered_jobs.append(job)
+        with open(filter_file) as ff:
+            filters = json.load(ff)
 
-    # set up title and headers
-    title = "Render Farm Status"
-    draw.text((10, 10), title, inky_display.BLACK, font=font_title)
+        filtered_jobs = []
+        for job in jobs:
+            match = True
+            for key in ['user', 'project', 'status']:
+                if filters.get(key) and job.get(key) != filters[key]:
+                    match = False
+                    break
+            if match:
+                filtered_jobs.append(job)
 
-    y = 40
-    spacing = 14
-    headers = f"{'User':<6} {'Proj':<8} {'Shot':<6} {'Status':<10} {'%':<4}"
-    draw.text((10, y), headers, inky_display.BLACK, font=font_data)
-    y += spacing
-    draw.text((10, y), "-" * 40, inky_display.BLACK, font=font_data)
-    y += spacing
+        # set up title and headers
+        title = "Render Farm Status"
+        draw.text((10, 10), title, inky_display.BLACK, font=font_title)
 
-    # Display up to 4 jobs
-    # TODO: adjust when font is being decided
-    for job in filtered_jobs[:4]:
-        row = f"{job['user'][:6]:<6} {job['project'][:8]:<8} {job['shot']:<6} {job['status']:<10} {job['progress']:>3}%"
-        draw.text((10, y), row, inky_display.BLACK, font=font_data)
+        y = 40
+        spacing = 14
+        headers = f"{'User':<6} {'Proj':<8} {'Shot':<6} {'Status':<10} {'%':<4}"
+        draw.text((10, y), headers, inky_display.BLACK, font=font_data)
+        y += spacing
+        draw.text((10, y), "-" * 40, inky_display.BLACK, font=font_data)
         y += spacing
 
-    # TODO: test this logic
-    if not filtered_jobs:
-        draw.text((10, y), "No jobs match filter.", inky_display.BLACK, font=font_data)
+        # Display up to 4 jobs
+        # TODO: adjust when font is being decided
+        for job in filtered_jobs[:4]:
+            row = f"{job['user'][:6]:<6} {job['project'][:8]:<8} {job['shot']:<6} {job['status']:<10} {job['progress']:>3}%"
+            draw.text((10, y), row, inky_display.BLACK, font=font_data)
+            y += spacing
 
-    # Show image
-    inky_display.set_image(img)
-    inky_display.show()
+        # TODO: test this logic
+        if not filtered_jobs:
+            draw.text((10, y), "No jobs match filter.", inky_display.BLACK, font=font_data)
+
+        # Show image
+        inky_display.set_image(img)
+        inky_display.show()
+
+        time.sleep(120) # refresh every 2 min
 
 display_render_farm()
 
