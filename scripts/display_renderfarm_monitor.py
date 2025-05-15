@@ -33,13 +33,13 @@ def display_render_farm():
     YELLOW = inky_display.YELLOW
     BLACK = inky_display.BLACK
     WHITE = inky_display.WHITE
-    GREY = BLACK  # Simulate grey with BLACK for now
+    ORANGE = inky_display.ORANGE
 
     status_colors = {
         "failed": RED,
         "done": GREEN,
         "rendering": YELLOW,
-        "waiting": GREY
+        "waiting": ORANGE
     }
 
     while True:
