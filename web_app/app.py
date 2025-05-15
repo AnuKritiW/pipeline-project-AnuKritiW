@@ -24,6 +24,23 @@ PROFILES = {
     },
 }
 
+def stop_current_profile():
+    current_profile = ""
+    if os.path.exists("selected_profile.txt"):
+        with open("selected_profile.txt") as f:
+            current_profile = f.read().strip()
+
+    if current_profile and current_profile in PROFILES:
+        script_name = PROFILES[current_profile]["script"]
+        subprocess.Popen(["pkill", "-f", script_name])
+
+        if current_profile == "renderfarm":
+            subprocess.Popen(["pkill", "-f", "simulate_render_jobs.py"])
+
+        open("selected_profile.txt", "w").close()
+
+    return current_profile
+
 # renders the home page using index.html
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -33,12 +50,8 @@ def index():
             current_profile = f.read().strip()
 
     if request.method == "POST" and request.form.get("stop_global"):
-        if current_profile and current_profile in PROFILES:
-            script_name = PROFILES[current_profile]["script"]
-            subprocess.Popen(["pkill", "-f", script_name])
-            open("selected_profile.txt", "w").close()
-            current_profile = ""
-        return redirect("/")
+        stop_current_profile()
+        return redirect(request.path)
 
     return render_template("index.html", profiles=PROFILES, current_profile=current_profile)
 
@@ -70,13 +83,10 @@ def profile_page(profile_key):
             # running = (f.read().strip() == profile_key)
 
     if request.method == "POST":
-        if request.form.get("stop_global"):
-            if current_profile and current_profile in PROFILES:
-                script_name = PROFILES[current_profile]["script"]
-                subprocess.Popen(["pkill", "-f", script_name])
-                open("selected_profile.txt", "w").close()
-                current_profile = ""
-            return redirect(f"/profile/{profile_key}")
+
+        if request.method == "POST" and request.form.get("stop_global"):
+            stop_current_profile()
+            return redirect(request.path)
 
         action = request.form.get("action")
         if action == "run":
@@ -177,12 +187,8 @@ def profile_image():
 
     # Global stop handler (from status card)
     if request.method == "POST" and request.form.get("stop_global"):
-        if current_profile and current_profile in PROFILES:
-            script_name = PROFILES[current_profile]["script"]
-            subprocess.Popen(["pkill", "-f", script_name])
-            open("selected_profile.txt", "w").close()
-            current_profile = ""
-            message = "Stopped current display."
+        stop_current_profile()
+        return redirect(request.path)
 
     return render_template(
         "display-image.html",
@@ -264,6 +270,10 @@ def profile_renderfarm():
 
     users = sorted(set(job['user'] for job in jobs))
     projects = sorted(set(job['project'] for job in jobs))
+
+    if request.method == "POST" and request.form.get("stop_global"):
+        stop_current_profile()
+        return redirect(request.path)
 
     return render_template(
         "display-renderfarm.html",
