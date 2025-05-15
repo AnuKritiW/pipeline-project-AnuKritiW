@@ -72,15 +72,19 @@ def display_render_farm():
         spacing = row_height + 4
 
         col_user = 10
-        col_proj = col_user + 80
-        col_status = col_proj + 130
-        col_bar = col_status + 110
-        bar_width = 130
+        col_proj = col_user + 70
+        col_tool = col_proj + 115
+        col_frames = col_tool+ 95
+        col_status = col_frames + 85
+        col_bar = col_status + 100
+        bar_width = 110
         bar_height = 14
 
         # header row
         draw.text((col_user, y), "User", BLACK, font=font_data_header)
         draw.text((col_proj, y), "Project", BLACK, font=font_data_header)
+        draw.text((col_tool, y), "Tool", BLACK, font=font_data_header)
+        draw.text((col_frames, y), "Frames", BLACK, font=font_data_header)
         draw.text((col_status, y), "Status", BLACK, font=font_data_header)
         draw.text((col_bar, y), "Progress", BLACK, font=font_data_header)
         y += spacing  # move below the header
@@ -90,6 +94,8 @@ def display_render_farm():
         for job in filtered_jobs[:max_rows]:
             draw.text((col_user, y), job["user"][:8], BLACK, font=font_data)
             draw.text((col_proj, y), job["project"][:14], BLACK, font=font_data)
+            draw.text((col_tool, y), job.get("tool", "")[:10], BLACK, font=font_data)
+            draw.text((col_frames, y), job.get("frames", "")[:10], BLACK, font=font_data)
 
             status = job.get("status", "unknown")
             color = status_colors.get(status, BLACK)
