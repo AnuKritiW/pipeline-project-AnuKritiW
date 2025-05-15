@@ -207,13 +207,21 @@ def profile_renderfarm():
             running = (current_profile == "renderfarm")
 
     if request.method == "POST":
-        script_name = PROFILES["renderfarm"]["script"]
-        script_path = f"/home/pi/pipeline-project-AnuKritiW/scripts/{script_name}"
+        monitor_script = PROFILES["renderfarm"]["script"]
+        monitor_path = f"/home/pi/pipeline-project-AnuKritiW/scripts/{monitor_script}"
+
+        sim_script = "simulate_render_jobs.py"
+        sim_path = f"/home/pi/pipeline-project-AnuKritiW/scripts/{sim_script}"
 
         if request.form.get("action") == "run":
             subprocess.Popen([
                 "/home/pi/.virtualenvs/pimoroni/bin/python3",
-                script_path
+                sim_path
+            ])
+            time.sleep(1)
+            subprocess.Popen([
+                "/home/pi/.virtualenvs/pimoroni/bin/python3",
+                monitor_path
             ])
             with open("selected_profile.txt", "w") as f:
                 f.write("renderfarm")
@@ -222,7 +230,9 @@ def profile_renderfarm():
             return redirect("/profile/renderfarm")
 
         elif request.form.get("action") == "stop":
-            subprocess.Popen(["pkill", "-f", script_name])
+            subprocess.Popen(["pkill", "-f", monitor_script])
+            time.sleep(1)
+            subprocess.Popen(["pkill", "-f", sim_script])
             open("selected_profile.txt", "w").close()
             running = False
             message = f"{name} stopped."
@@ -244,11 +254,11 @@ def profile_renderfarm():
                 json.dump(filter_data, f, indent=2)
 
             # restart the display script so it refreshes immediately
-            subprocess.Popen(["pkill", "-f", script_name])
+            subprocess.Popen(["pkill", "-f", monitor_script])
             time.sleep(1)
             subprocess.Popen([
                 "/home/pi/.virtualenvs/pimoroni/bin/python3",
-                script_path
+                monitor_path
             ])
 
             message = "Filter updated."
