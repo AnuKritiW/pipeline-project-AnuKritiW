@@ -10,7 +10,7 @@ PROFILES = {
     "stats": {
         "name": "System Stats",
         "icon": "📊",
-        "script": "stats-test.py"
+        "script": "display_stats.py"
     },
     "image": {
         "name": "Image Display",
