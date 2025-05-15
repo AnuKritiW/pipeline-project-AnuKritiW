@@ -34,6 +34,7 @@ def display_render_farm():
     BLACK = inky_display.BLACK
     WHITE = inky_display.WHITE
     ORANGE = inky_display.ORANGE
+    BLUE = inky_display.BLUE
 
     status_colors = {
         "failed": RED,
@@ -118,7 +119,7 @@ def display_render_farm():
 
             progress = job.get("progress", 0)
             fill_width = int(bar_width * progress / 100)
-            bar_color = GREEN if progress == 100 else BLACK
+            bar_color = GREEN if progress == 100 else BLUE
 
             bar_x = col_bar
             bar_y = y + 2
