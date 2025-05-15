@@ -14,9 +14,11 @@ def display_render_farm():
     # Load fonts
     try:
         font_title = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 20)
+        font_data_header = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 14)
         font_data = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
     except:
         font_title = ImageFont.load_default()
+        font_data_header = ImageFont.load_default()
         font_data = ImageFont.load_default()
 
     # get paths to renderfarm status and filter files
@@ -77,10 +79,10 @@ def display_render_farm():
         bar_height = 14
 
         # header row
-        draw.text((col_user, y), "User", BLACK, font=font_data)
-        draw.text((col_proj, y), "Project", BLACK, font=font_data)
-        draw.text((col_status, y), "Status", BLACK, font=font_data)
-        draw.text((col_bar, y), "Progress", BLACK, font=font_data)
+        draw.text((col_user, y), "User", BLACK, font=font_data_header)
+        draw.text((col_proj, y), "Project", BLACK, font=font_data_header)
+        draw.text((col_status, y), "Status", BLACK, font=font_data_header)
+        draw.text((col_bar, y), "Progress", BLACK, font=font_data_header)
         y += spacing  # move below the header
 
         max_rows = (HEIGHT - y - 10) // spacing
