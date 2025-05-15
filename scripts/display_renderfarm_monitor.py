@@ -72,9 +72,9 @@ def display_render_farm():
         spacing = row_height + 4
 
         col_user = 10
-        col_proj = 90
-        col_status = 200
-        col_bar = 310
+        col_proj = col_user + 80
+        col_status = col_proj + 130
+        col_bar = col_status + 110
         bar_width = 130
         bar_height = 14
 
@@ -89,11 +89,24 @@ def display_render_farm():
 
         for job in filtered_jobs[:max_rows]:
             draw.text((col_user, y), job["user"][:8], BLACK, font=font_data)
-            draw.text((col_proj, y), job["project"][:10], BLACK, font=font_data)
+            draw.text((col_proj, y), job["project"][:14], BLACK, font=font_data)
 
             status = job.get("status", "unknown")
             color = status_colors.get(status, BLACK)
-            draw.text((col_status, y), status.capitalize(), color, font=font_data)
+
+            # Fill status cell background
+            status_text = status.capitalize()
+            status_w, status_h = draw.textsize(status_text, font=font_data)
+            padding = 4
+            status_box = [
+                col_status - padding,
+                y - 2,
+                col_status + status_w + padding,
+                y + status_h + 2
+            ]
+            draw.rectangle(status_box, fill=color)
+            draw.text((col_status, y), status_text, BLACK, font=font_data)
+
 
             progress = job.get("progress", 0)
             fill_width = int(bar_width * progress / 100)
