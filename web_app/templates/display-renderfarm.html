@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+  <a href="/" style="text-decoration:none;font-size:0.9rem;">&larr; Back to Dashboard</a>
+  <h1>🧮 Render Farm Monitor</h1>
+
+  <h3>Start or Stop Display</h3>
+  <form method="POST">
+    {% if running %}
+      <button type="submit" class="btn btn-red" name="action" value="stop">⏹ Stop Display</button>
+    {% else %}
+      <button type="submit" class="btn btn-green" name="action" value="run">▶ Run Display</button>
+    {% endif %}
+  </form>
+
+  {% if message %}
+    <p><em>{{ message }}</em></p>
+  {% endif %}
+
+  <h3>Filter Jobs</h3>
+  <form method="POST">
+    <div class="file-input-wrapper" style="margin-bottom: 1rem;">
+      <label for="filter_user">User:</label>
+      <!-- <input type="text" name="filter_user" id="filter_user" placeholder="e.g. John"> -->
+      <select name="filter_user" id="filter_user">
+  	<option value="">(Any)</option>
+  	{% for user in users %}
+    	  <option value="{{ user }}">{{ user }}</option>
+  	{% endfor %}
+      </select>
+
+    </div>
+    <div class="file-input-wrapper" style="margin-bottom: 1rem;">
+      <label for="filter_project">Project:</label>
+      <!--<input type="text" name="filter_project" id="filter_project" placeholder="e.g. deep-sea">-->
+      <select name="filter_project" id="filter_project">
+  	<option value="">(Any)</option>
+  	  {% for project in projects %}
+    	    <option value="{{ project }}">{{ project }}</option>
+  	  {% endfor %}
+      </select>
+    </div>
+
+    <div class="file-input-wrapper" style="margin-bottom: 1rem;">
+      <label for="filter_tool">Tool:</label>
+      <select name="filter_tool" id="filter_tool">
+        <option value="">(Any)</option>
+        {% for tool in tools %}
+          <option value="{{ tool }}">{{ tool }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="file-input-wrapper" style="margin-bottom: 1rem;">
+      <label for="filter_status">Status:</label>
+      <select name="filter_status" id="filter_status">
+        <option value="">(Any)</option>
+        <option value="rendering">Rendering</option>
+        <option value="waiting">Waiting</option>
+        <option value="done">Done</option>
+	<option value="failed">Failed</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-blue" name="action" value="update_filter">Update Filter</button>
+  </form>
+
+  {% if current_filter %}
+    <div style="margin-top: 1rem; font-size: 0.9rem; color: #444;">
+      <strong>Current Filter:</strong>
+      {% set parts = [] %}
+      {% if current_filter.user %} {% set _ = parts.append("User = '" ~ current_filter.user ~ "'") %} {% endif %}
+      {% if current_filter.project %} {% set _ = parts.append("Project = '" ~ current_filter.project ~ "'") %} {% endif %}
+      {% if current_filter.tool %} {% set _ = parts.append("Tools = '" ~ current_filter.tool ~ "'") %} {% endif %}
+      {% if current_filter.status %} {% set _ = parts.append("Status = '" ~ current_filter.status ~ "'") %} {% endif %}
+      {{ parts | join(', ') if parts else "None (showing all jobs)" }}
+    </div>
+  {% endif %}
+
+{% endblock %}
+

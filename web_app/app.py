@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect
 import subprocess
 import os
+import json
+import time
 
 app = Flask(__name__, static_url_path='/static')
 
@@ -14,8 +16,30 @@ PROFILES = {
         "name": "Image Display",
         "icon": "🖼️",
         "script": "display-image.py"
-    }
+    },
+    "renderfarm": {
+        "name": "Renderfarm Monitor",
+        "icon": "🧮",
+        "script": "display_renderfarm_monitor.py"
+    },
 }
+
+def stop_current_profile():
+    current_profile = ""
+    if os.path.exists("selected_profile.txt"):
+        with open("selected_profile.txt") as f:
+            current_profile = f.read().strip()
+
+    if current_profile and current_profile in PROFILES:
+        script_name = PROFILES[current_profile]["script"]
+        subprocess.Popen(["pkill", "-f", script_name])
+
+        if current_profile == "renderfarm":
+            subprocess.Popen(["pkill", "-f", "simulate_render_jobs.py"])
+
+        open("selected_profile.txt", "w").close()
+
+    return current_profile
 
 # renders the home page using index.html
 @app.route("/", methods=["GET", "POST"])
@@ -26,13 +50,9 @@ def index():
             current_profile = f.read().strip()
 
     if request.method == "POST" and request.form.get("stop_global"):
-        if current_profile and current_profile in PROFILES:
-            script_name = PROFILES[current_profile]["script"]
-            subprocess.Popen(["pkill", "-f", script_name])
-            open("selected_profile.txt", "w").close()
-            current_profile = ""
-        return redirect("/") 
-    
+        stop_current_profile()
+        return redirect(request.path)
+
     return render_template("index.html", profiles=PROFILES, current_profile=current_profile)
 
 # creates a generic profile page if no special profile has been created for it
@@ -47,6 +67,8 @@ def profile_page(profile_key):
 
     if profile_key == "image":
         return redirect("/profile/image")
+    elif profile_key == "renderfarm":
+        return redirect("/profile/renderfarm")
 
     script = PROFILES[profile_key]["script"]
     name = PROFILES[profile_key]["name"]
@@ -61,13 +83,10 @@ def profile_page(profile_key):
             # running = (f.read().strip() == profile_key)
 
     if request.method == "POST":
-        if request.form.get("stop_global"):
-            if current_profile and current_profile in PROFILES:
-                script_name = PROFILES[current_profile]["script"]
-                subprocess.Popen(["pkill", "-f", script_name])
-                open("selected_profile.txt", "w").close()
-                current_profile = ""
-            return redirect(f"/profile/{profile_key}")
+
+        if request.method == "POST" and request.form.get("stop_global"):
+            stop_current_profile()
+            return redirect(request.path)
 
         action = request.form.get("action")
         if action == "run":
@@ -168,12 +187,8 @@ def profile_image():
 
     # Global stop handler (from status card)
     if request.method == "POST" and request.form.get("stop_global"):
-        if current_profile and current_profile in PROFILES:
-            script_name = PROFILES[current_profile]["script"]
-            subprocess.Popen(["pkill", "-f", script_name])
-            open("selected_profile.txt", "w").close()
-            current_profile = ""
-            message = "Stopped current display."
+        stop_current_profile()
+        return redirect(request.path)
 
     return render_template(
         "display-image.html",
@@ -181,6 +196,119 @@ def profile_image():
         current_image=current_image,
         message=message,
         current_profile=current_profile
+    )
+
+@app.route("/profile/renderfarm", methods=["GET", "POST"])
+def profile_renderfarm():
+    name = PROFILES["renderfarm"]["name"]
+    message = ""
+    running = False
+    data_dir = os.path.join(app.root_path, "data")
+
+    # Load current profile
+    current_profile = ""
+    if os.path.exists("selected_profile.txt"):
+        with open("selected_profile.txt") as f:
+            current_profile = f.read().strip()
+            running = (current_profile == "renderfarm")
+
+    if request.method == "POST":
+        monitor_script = PROFILES["renderfarm"]["script"]
+        monitor_path = f"/home/pi/pipeline-project-AnuKritiW/scripts/{monitor_script}"
+
+        sim_script = "simulate_render_jobs.py"
+        sim_path = f"/home/pi/pipeline-project-AnuKritiW/scripts/{sim_script}"
+
+        if request.form.get("action") == "run":
+            subprocess.Popen([
+                "/home/pi/.virtualenvs/pimoroni/bin/python3",
+                monitor_path
+            ])
+            with open("selected_profile.txt", "w") as f:
+                f.write("renderfarm")
+            running = True
+            message = f"{name} started."
+            return redirect("/profile/renderfarm")
+
+        elif request.form.get("action") == "stop":
+            subprocess.Popen(["pkill", "-f", monitor_script])
+            time.sleep(1)
+            subprocess.Popen(["pkill", "-f", sim_script])
+            open("selected_profile.txt", "w").close()
+            running = False
+            message = f"{name} stopped."
+            return redirect("/profile/renderfarm")
+
+        elif request.form.get("action") == "update_filter":
+            user = request.form.get("filter_user", "").strip()
+            project = request.form.get("filter_project", "").strip()
+            status = request.form.get("filter_status", "").strip()
+            tool = request.form.get("filter_tool", "").strip()
+
+            filter_data = {
+                "user": user,
+                "project": project,
+                "tool": tool,
+                "status": status
+            }
+
+            filter_path = os.path.join(data_dir, 'renderfarm_filter.json')
+            with open(filter_path, "w") as f:
+                json.dump(filter_data, f, indent=2)
+
+            if running:
+                # restart the display script so it refreshes immediately
+                subprocess.Popen(["pkill", "-f", monitor_script])
+                time.sleep(1)
+                subprocess.Popen([
+                    "/home/pi/.virtualenvs/pimoroni/bin/python3",
+                    monitor_path
+                ])
+
+            message = "Filter updated."
+            return redirect("/profile/renderfarm")
+
+    with open(os.path.join(data_dir, 'renderfarm_status.json')) as f:
+        jobs = json.load(f)
+
+    users = sorted(set(job['user'] for job in jobs))
+    projects = sorted(set(job['project'] for job in jobs))
+    tools = sorted(set(job['tool'] for job in jobs))
+
+    if request.method == "POST" and request.form.get("stop_global"):
+        stop_current_profile()
+        return redirect(request.path)
+
+    # Always define filter_data, from file if not set in POST
+    if 'filter_data' not in locals():
+        filter_path = os.path.join(data_dir, 'renderfarm_filter.json')
+        if os.path.exists(filter_path):
+            try:
+                with open(filter_path) as f:
+                    filter_data = json.load(f)
+            except json.JSONDecodeError:
+                filter_data = {}
+        else:
+            filter_data = {}
+
+    current_filter = {
+        "user": filter_data.get("user", ""),
+        "project": filter_data.get("project", ""),
+        "tool": filter_data.get("tool", ""),
+        "status": filter_data.get("status", "")
+    }
+
+    return render_template(
+        "display-renderfarm.html",
+        profile_name=name,
+        profile_key="renderfarm",
+        running=running,
+        message=message,
+        current_profile=current_profile,
+        users=users,
+        projects=projects,
+        tools=tools,
+        current_filter=current_filter
     )
 
 # clear files when script is interrupted
@@ -193,6 +321,13 @@ def clear_session_files():
         open("/home/pi/pipeline-project-AnuKritiW/web_app/current_image.txt", "w").close()
     except Exception as e:
         print(f"Error clearing current_image.txt: {e}")
+    try:
+        filter_path = os.path.join(app.root_path, "data", "renderfarm_filter.json")
+        with open(filter_path, "w") as f:
+            json.dump({"user": "", "project": "", "status": "", "tool": ""}, f, indent=2)
+    except Exception as e:
+        print(f"Error resetting renderfarm_filter.json: {e}")
+
     print("Session files cleared.")
 
 if __name__ == "__main__":

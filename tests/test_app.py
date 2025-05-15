@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 import pytest
 from unittest.mock import patch, mock_open
 import io
-from web_app.app import app
+from web_app.app import app, stop_current_profile, PROFILES
 import subprocess
 
 @pytest.fixture
@@ -136,12 +136,23 @@ def test_upload_missing_file(mock_uploads, client):
     assert b"Invalid file type" in response.data  # Should trigger the invalid type branch
 
 # test app correctly kills the script when users want to stop everything
-@patch('web_app.app.subprocess.Popen')
-@patch('builtins.open', new_callable=mock_open, read_data="stats")
-def test_stop_global_action(mock_open_file, mock_popen, mock_uploads, client):
-    with patch('web_app.app.os.listdir', return_value=["test.jpg"]):
-        response = client.post("/profile/image", data={"stop_global": "1"})
-        assert response.status_code == 200
-        mock_popen.assert_called_once()
+@patch("web_app.app.subprocess.Popen")
+@patch("builtins.open", new_callable=mock_open, read_data="renderfarm")
+@patch("web_app.app.os.path.exists", return_value=True)
+def test_stop_current_profile(mock_exists, mock_open_file, mock_popen):
+    stopped_profile = stop_current_profile()
+
+    # Should return the stopped profile name
+    assert stopped_profile == "renderfarm"
+
+    # Should call pkill for the main script
+    monitor_script = PROFILES["renderfarm"]["script"]
+    mock_popen.assert_any_call(["pkill", "-f", monitor_script])
+
+    # Should also call pkill for the simulate script
+    mock_popen.assert_any_call(["pkill", "-f", "simulate_render_jobs.py"])
+
+    # Should clear the profile file
+    assert mock_open_file.call_count >= 2  # read + write
 
 # to run `pytest tests/``
