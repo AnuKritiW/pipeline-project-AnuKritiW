@@ -243,10 +243,12 @@ def profile_renderfarm():
             user = request.form.get("filter_user", "").strip()
             project = request.form.get("filter_project", "").strip()
             status = request.form.get("filter_status", "").strip()
+            tool = request.form.get("filter_tool", "").strip()
 
             filter_data = {
                 "user": user,
                 "project": project,
+                "tool": tool,
                 "status": status
             }
 
@@ -271,6 +273,7 @@ def profile_renderfarm():
 
     users = sorted(set(job['user'] for job in jobs))
     projects = sorted(set(job['project'] for job in jobs))
+    tools = sorted(set(job['tool'] for job in jobs))
 
     if request.method == "POST" and request.form.get("stop_global"):
         stop_current_profile()
@@ -291,6 +294,7 @@ def profile_renderfarm():
     current_filter = {
         "user": filter_data.get("user", ""),
         "project": filter_data.get("project", ""),
+        "tool": filter_data.get("tool", ""),
         "status": filter_data.get("status", "")
     }
 
@@ -303,6 +307,7 @@ def profile_renderfarm():
         current_profile=current_profile,
         users=users,
         projects=projects,
+        tools=tools,
         current_filter=current_filter
     )
 

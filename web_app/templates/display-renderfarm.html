@@ -38,8 +38,18 @@
     	    <option value="{{ project }}">{{ project }}</option>
   	  {% endfor %}
       </select>
-
     </div>
+
+    <div class="file-input-wrapper" style="margin-bottom: 1rem;">
+      <label for="filter_tool">Tool:</label>
+      <select name="filter_tool" id="filter_tool">
+        <option value="">(Any)</option>
+        {% for tool in tools %}
+          <option value="{{ tool }}">{{ tool }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
     <div class="file-input-wrapper" style="margin-bottom: 1rem;">
       <label for="filter_status">Status:</label>
       <select name="filter_status" id="filter_status">
@@ -59,6 +69,7 @@
       {% set parts = [] %}
       {% if current_filter.user %} {% set _ = parts.append("User = '" ~ current_filter.user ~ "'") %} {% endif %}
       {% if current_filter.project %} {% set _ = parts.append("Project = '" ~ current_filter.project ~ "'") %} {% endif %}
+      {% if current_filter.tool %} {% set _ = parts.append("Tools = '" ~ current_filter.tool ~ "'") %} {% endif %}
       {% if current_filter.status %} {% set _ = parts.append("Status = '" ~ current_filter.status ~ "'") %} {% endif %}
       {{ parts | join(', ') if parts else "None (showing all jobs)" }}
     </div>

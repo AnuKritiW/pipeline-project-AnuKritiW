@@ -64,7 +64,7 @@ def display_render_farm():
 
         filtered_jobs = [
             job for job in jobs
-            if all(not filters.get(k) or job.get(k) == filters[k] for k in ['user', 'project', 'status'])
+            if all(not filters.get(k) or job.get(k) == filters[k] for k in ['user', 'project', 'tool', 'status'])
         ]
 
         # set up title and headers
