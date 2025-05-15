@@ -275,6 +275,24 @@ def profile_renderfarm():
         stop_current_profile()
         return redirect(request.path)
 
+    # Always define filter_data, from file if not set in POST
+    if 'filter_data' not in locals():
+        filter_path = os.path.join(data_dir, 'renderfarm_filter.json')
+        if os.path.exists(filter_path):
+            try:
+                with open(filter_path) as f:
+                    filter_data = json.load(f)
+            except json.JSONDecodeError:
+                filter_data = {}
+        else:
+            filter_data = {}
+
+    current_filter = {
+        "user": filter_data.get("user", ""),
+        "project": filter_data.get("project", ""),
+        "status": filter_data.get("status", "")
+    }
+
     return render_template(
         "display-renderfarm.html",
         profile_name=name,
@@ -283,7 +301,8 @@ def profile_renderfarm():
         message=message,
         current_profile=current_profile,
         users=users,
-        projects=projects
+        projects=projects,
+        current_filter=current_filter
     )
 
 # clear files when script is interrupted

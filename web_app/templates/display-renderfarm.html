@@ -52,5 +52,17 @@
     </div>
     <button type="submit" class="btn btn-blue" name="action" value="update_filter">Update Filter</button>
   </form>
+
+  {% if current_filter %}
+    <div style="margin-top: 1rem; font-size: 0.9rem; color: #444;">
+      <strong>Current Filter:</strong>
+      {% set parts = [] %}
+      {% if current_filter.user %} {% set _ = parts.append("User = '" ~ current_filter.user ~ "'") %} {% endif %}
+      {% if current_filter.project %} {% set _ = parts.append("Project = '" ~ current_filter.project ~ "'") %} {% endif %}
+      {% if current_filter.status %} {% set _ = parts.append("Status = '" ~ current_filter.status ~ "'") %} {% endif %}
+      {{ parts | join(', ') if parts else "None (showing all jobs)" }}
+    </div>
+  {% endif %}
+
 {% endblock %}
 
