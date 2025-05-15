@@ -254,13 +254,14 @@ def profile_renderfarm():
             with open(filter_path, "w") as f:
                 json.dump(filter_data, f, indent=2)
 
-            # restart the display script so it refreshes immediately
-            subprocess.Popen(["pkill", "-f", monitor_script])
-            time.sleep(1)
-            subprocess.Popen([
-                "/home/pi/.virtualenvs/pimoroni/bin/python3",
-                monitor_path
-            ])
+            if running:
+                # restart the display script so it refreshes immediately
+                subprocess.Popen(["pkill", "-f", monitor_script])
+                time.sleep(1)
+                subprocess.Popen([
+                    "/home/pi/.virtualenvs/pimoroni/bin/python3",
+                    monitor_path
+                ])
 
             message = "Filter updated."
             return redirect("/profile/renderfarm")
