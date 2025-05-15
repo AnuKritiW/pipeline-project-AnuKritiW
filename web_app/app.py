@@ -6,6 +6,15 @@ import time
 
 app = Flask(__name__, static_url_path='/static')
 
+# Base paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SCRIPT_DIR = os.path.normpath(os.path.join(BASE_DIR, '..', 'scripts'))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+STATIC_UPLOADS = os.path.join(BASE_DIR, 'static', 'uploads')
+SELECTED_PROFILE_FILE = os.path.join(BASE_DIR, 'selected_profile.txt')
+CURRENT_IMAGE_FILE = os.path.join(BASE_DIR, 'current_image.txt')
+
+# Script filenames
 PROFILES = {
     "stats": {
         "name": "System Stats",
@@ -20,14 +29,15 @@ PROFILES = {
     "renderfarm": {
         "name": "Renderfarm Monitor",
         "icon": "🧮",
-        "script": "display_renderfarm_monitor.py"
+        "script": "display_renderfarm_monitor.py",
+        "simulate": "simulate_render_jobs.py"
     },
 }
 
+# Stop current profile helper
 def stop_current_profile():
-    current_profile = ""
-    if os.path.exists("selected_profile.txt"):
-        with open("selected_profile.txt") as f:
+    if os.path.exists(SELECTED_PROFILE_FILE):
+        with open(SELECTED_PROFILE_FILE) as f:
             current_profile = f.read().strip()
 
     if current_profile and current_profile in PROFILES:
@@ -35,18 +45,19 @@ def stop_current_profile():
         subprocess.Popen(["pkill", "-f", script_name])
 
         if current_profile == "renderfarm":
-            subprocess.Popen(["pkill", "-f", "simulate_render_jobs.py"])
+            subprocess.Popen(["pkill", "-f", PROFILES["renderfarm"]["simulate"]])
 
-        open("selected_profile.txt", "w").close()
+        open(SELECTED_PROFILE_FILE, "w").close()
 
     return current_profile
 
+# Route: Home
 # renders the home page using index.html
 @app.route("/", methods=["GET", "POST"])
 def index():
     current_profile = ""
-    if os.path.exists("selected_profile.txt"):
-        with open("selected_profile.txt") as f:
+    if os.path.exists(SELECTED_PROFILE_FILE):
+        with open(SELECTED_PROFILE_FILE) as f:
             current_profile = f.read().strip()
 
     if request.method == "POST" and request.form.get("stop_global"):
@@ -55,6 +66,7 @@ def index():
 
     return render_template("index.html", profiles=PROFILES, current_profile=current_profile)
 
+# Route: Generic Profile
 # creates a generic profile page if no special profile has been created for it
 # GET checks if the profile exists, then redirects to the right profile
 # a file 'selected_profile.txt' is created that describes what profile is currently running, if any
@@ -70,43 +82,48 @@ def profile_page(profile_key):
     elif profile_key == "renderfarm":
         return redirect("/profile/renderfarm")
 
-    script = PROFILES[profile_key]["script"]
+    script_path = os.path.join(SCRIPT_DIR, PROFILES[profile_key]["script"])
     name = PROFILES[profile_key]["name"]
     message = ""
     running = False
 
     current_profile = ""
-    if os.path.exists("selected_profile.txt"):
-        with open("selected_profile.txt") as f:
+    if os.path.exists(SELECTED_PROFILE_FILE):
+        with open(SELECTED_PROFILE_FILE) as f:
             current_profile = f.read().strip()
             running = (current_profile == profile_key)
-            # running = (f.read().strip() == profile_key)
 
     if request.method == "POST":
-
-        if request.method == "POST" and request.form.get("stop_global"):
+        if request.form.get("stop_global"):
             stop_current_profile()
             return redirect(request.path)
 
         action = request.form.get("action")
         if action == "run":
             subprocess.Popen([
-                "/home/pi/.virtualenvs/pimoroni/bin/python3",
-                f"/home/pi/pipeline-project-AnuKritiW/scripts/{script}"
+                "/home/pi/.virtualenvs/pimoroni/bin/python3", script_path
             ])
-            with open("selected_profile.txt", "w") as f:
+            with open(SELECTED_PROFILE_FILE, "w") as f:
                 f.write(profile_key)
             running = True
             message = f"{name} started."
         elif action == "stop":
-            subprocess.Popen(["pkill", "-f", script])
-            open("selected_profile.txt", "w").close()
+            subprocess.Popen(["pkill", "-f", script_path])
+            open(SELECTED_PROFILE_FILE, "w").close()
             running = False
             message = f"{name} stopped."
         return redirect(f"/profile/{profile_key}")
 
-    return render_template("display-generic.html", profile_name=name, profile_key=profile_key, running=running, message=message, current_profile=current_profile)
+    return render_template(
+        "display-generic.html",
+        profile_name=name,
+        profile_key=profile_key,
+        running=running,
+        message=message,
+        current_profile=current_profile
+    )
 
+# Route: Image Profile
 # specialised image profile page
 # GET loads current image name (if set) and lists all uploaded images
 # POST either uploads, displays or deletes.
@@ -114,12 +131,6 @@ def profile_page(profile_key):
 # lastly, renders display_image.html
 @app.route("/profile/image", methods=["GET", "POST"])
 def profile_image():
-    # TODO: make all paths relative
-    # UPLOAD_FOLDER = "/home/pi/pipeline-project-AnuKritiW/uploads"
-    UPLOAD_FOLDER = os.path.join(app.root_path, "static/uploads")
-    CURRENT_IMAGE_FILE = "/home/pi/pipeline-project-AnuKritiW/web_app/current_image.txt"
-    DISPLAY_SCRIPT = "/home/pi/pipeline-project-AnuKritiW/scripts/display_image.py"
-
     message = ""
     current_image = ""
 
@@ -136,7 +147,7 @@ def profile_image():
         if action == "upload":
             uploaded_file = request.files.get("image")
             if uploaded_file and uploaded_file.filename.lower().endswith((".png", ".jpg", ".jpeg")):
-                filepath = os.path.join(UPLOAD_FOLDER, uploaded_file.filename)
+                filepath = os.path.join(STATIC_UPLOADS, uploaded_file.filename)
                 uploaded_file.save(filepath)
                 message = f"Uploaded {uploaded_file.filename}"
             else:
@@ -145,12 +156,12 @@ def profile_image():
         # Display selected image
         elif action == "display":
             filename = request.form.get("selected_image")
-            image_path = os.path.join(UPLOAD_FOLDER, filename)
+            image_path = os.path.join(STATIC_UPLOADS, filename)
 
             try:
                 subprocess.run([
                     "/home/pi/.virtualenvs/pimoroni/bin/python3",
-                    DISPLAY_SCRIPT,
+                    os.path.join(SCRIPT_DIR, PROFILES["image"]["script"]),
                     image_path
                 ], check=True)  # check=True will raise CalledProcessError if fails
                 with open(CURRENT_IMAGE_FILE, "w") as f:
@@ -159,13 +170,12 @@ def profile_image():
                 message = f"Now displaying {filename}"
             except subprocess.CalledProcessError as e:
                 message = "Failed to display image. The display might be busy or another script is running."
-                # message = f"Failed to display image: {e}"
 
         # Delete selected image
         elif action == "delete":
             filename = request.form.get("delete_image")
             try:
-                os.remove(os.path.join(UPLOAD_FOLDER, filename))
+                os.remove(os.path.join(STATIC_UPLOADS, filename))
                 if filename == current_image:
                     current_image = ""
                     open(CURRENT_IMAGE_FILE, "w").close()
@@ -174,15 +184,15 @@ def profile_image():
                 message = f"Error deleting {filename}: {e}"
 
     # Make sure the uploads folder exists
-    if not os.path.exists(UPLOAD_FOLDER):
-        os.makedirs(UPLOAD_FOLDER)
+    if not os.path.exists(STATIC_UPLOADS):
+        os.makedirs(STATIC_UPLOADS)
 
     # List available images
-    images = os.listdir(UPLOAD_FOLDER)
+    images = os.listdir(STATIC_UPLOADS)
 
     current_profile = ""
-    if os.path.exists("selected_profile.txt"):
-        with open("selected_profile.txt") as f:
+    if os.path.exists(SELECTED_PROFILE_FILE):
+        with open(SELECTED_PROFILE_FILE) as f:
             current_profile = f.read().strip()
 
     # Global stop handler (from status card)
@@ -198,33 +208,31 @@ def profile_image():
         current_profile=current_profile
     )
 
+# Route: Renderfarm profile
 @app.route("/profile/renderfarm", methods=["GET", "POST"])
 def profile_renderfarm():
     name = PROFILES["renderfarm"]["name"]
     message = ""
     running = False
-    data_dir = os.path.join(app.root_path, "data")
+    monitor_script = PROFILES["renderfarm"]["script"]
+    sim_script = PROFILES["renderfarm"]["simulate"]
+    monitor_path = os.path.join(SCRIPT_DIR, monitor_script)
+    # data_dir = os.path.join(app.root_path, "data")
 
     # Load current profile
     current_profile = ""
-    if os.path.exists("selected_profile.txt"):
-        with open("selected_profile.txt") as f:
+    if os.path.exists(SELECTED_PROFILE_FILE):
+        with open(SELECTED_PROFILE_FILE) as f:
             current_profile = f.read().strip()
             running = (current_profile == "renderfarm")
 
     if request.method == "POST":
-        monitor_script = PROFILES["renderfarm"]["script"]
-        monitor_path = f"/home/pi/pipeline-project-AnuKritiW/scripts/{monitor_script}"
-
-        sim_script = "simulate_render_jobs.py"
-        sim_path = f"/home/pi/pipeline-project-AnuKritiW/scripts/{sim_script}"
-
         if request.form.get("action") == "run":
             subprocess.Popen([
                 "/home/pi/.virtualenvs/pimoroni/bin/python3",
                 monitor_path
             ])
-            with open("selected_profile.txt", "w") as f:
+            with open(SELECTED_PROFILE_FILE, "w") as f:
                 f.write("renderfarm")
             running = True
             message = f"{name} started."
@@ -234,25 +242,20 @@ def profile_renderfarm():
             subprocess.Popen(["pkill", "-f", monitor_script])
             time.sleep(1)
             subprocess.Popen(["pkill", "-f", sim_script])
-            open("selected_profile.txt", "w").close()
+            open(SELECTED_PROFILE_FILE, "w").close()
             running = False
             message = f"{name} stopped."
             return redirect("/profile/renderfarm")
 
         elif request.form.get("action") == "update_filter":
-            user = request.form.get("filter_user", "").strip()
-            project = request.form.get("filter_project", "").strip()
-            status = request.form.get("filter_status", "").strip()
-            tool = request.form.get("filter_tool", "").strip()
-
             filter_data = {
-                "user": user,
-                "project": project,
-                "tool": tool,
-                "status": status
+                "user": request.form.get("filter_user", "").strip(),
+                "project": request.form.get("filter_project", "").strip(),
+                "status": request.form.get("filter_status", "").strip(),
+                "tool": request.form.get("filter_tool", "").strip()
             }
 
-            filter_path = os.path.join(data_dir, 'renderfarm_filter.json')
+            filter_path = os.path.join(DATA_DIR, 'renderfarm_filter.json')
             with open(filter_path, "w") as f:
                 json.dump(filter_data, f, indent=2)
 
@@ -268,7 +271,7 @@ def profile_renderfarm():
             message = "Filter updated."
             return redirect("/profile/renderfarm")
 
-    with open(os.path.join(data_dir, 'renderfarm_status.json')) as f:
+    with open(os.path.join(DATA_DIR, 'renderfarm_status.json')) as f:
         jobs = json.load(f)
 
     users = sorted(set(job['user'] for job in jobs))
@@ -281,7 +284,7 @@ def profile_renderfarm():
 
     # Always define filter_data, from file if not set in POST
     if 'filter_data' not in locals():
-        filter_path = os.path.join(data_dir, 'renderfarm_filter.json')
+        filter_path = os.path.join(DATA_DIR, 'renderfarm_filter.json')
         if os.path.exists(filter_path):
             try:
                 with open(filter_path) as f:
@@ -314,15 +317,15 @@ def profile_renderfarm():
 # clear files when script is interrupted
 def clear_session_files():
     try:
-        open("selected_profile.txt", "w").close()
+        open(SELECTED_PROFILE_FILE, "w").close()
     except Exception as e:
         print(f"Error clearing selected_profile.txt: {e}")
     try:
-        open("/home/pi/pipeline-project-AnuKritiW/web_app/current_image.txt", "w").close()
+        open(CURRENT_IMAGE_FILE, "w").close()
     except Exception as e:
         print(f"Error clearing current_image.txt: {e}")
     try:
-        filter_path = os.path.join(app.root_path, "data", "renderfarm_filter.json")
+        filter_path = os.path.join(DATA_DIR, "renderfarm_filter.json")
         with open(filter_path, "w") as f:
             json.dump({"user": "", "project": "", "status": "", "tool": ""}, f, indent=2)
     except Exception as e:
@@ -334,7 +337,7 @@ if __name__ == "__main__":
     try:
         subprocess.Popen([
             "/home/pi/.virtualenvs/pimoroni/bin/python3",
-            "/home/pi/pipeline-project-AnuKritiW/scripts/splash_screen.py"
+            os.path.join(SCRIPT_DIR, "splash_screen.py")
         ])
         app.run(host="0.0.0.0", port=5000)
     finally:
