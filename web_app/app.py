@@ -321,6 +321,13 @@ def clear_session_files():
         open("/home/pi/pipeline-project-AnuKritiW/web_app/current_image.txt", "w").close()
     except Exception as e:
         print(f"Error clearing current_image.txt: {e}")
+    try:
+        filter_path = os.path.join(app.root_path, "data", "renderfarm_filter.json")
+        with open(filter_path, "w") as f:
+            json.dump({"user": "", "project": "", "status": "", "tool": ""}, f, indent=2)
+    except Exception as e:
+        print(f"Error resetting renderfarm_filter.json: {e}")
+
     print("Session files cleared.")
 
 if __name__ == "__main__":
