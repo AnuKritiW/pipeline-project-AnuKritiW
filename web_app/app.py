@@ -216,11 +216,6 @@ def profile_renderfarm():
         if request.form.get("action") == "run":
             subprocess.Popen([
                 "/home/pi/.virtualenvs/pimoroni/bin/python3",
-                sim_path
-            ])
-            time.sleep(1)
-            subprocess.Popen([
-                "/home/pi/.virtualenvs/pimoroni/bin/python3",
                 monitor_path
             ])
             with open("selected_profile.txt", "w") as f:

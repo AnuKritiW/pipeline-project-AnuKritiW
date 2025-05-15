@@ -3,6 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 import json
 import time
+import subprocess
 
 def display_render_farm():
     # setup display
@@ -145,5 +146,11 @@ def display_render_farm():
 
         time.sleep(120) # refresh every 2 min
 
+def simulate_render_jobs():
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    sim_script_path = os.path.join(script_dir, "simulate_render_jobs.py")
+    subprocess.Popen(["python3", sim_script_path])
+
+simulate_render_jobs()
 display_render_farm()
 
