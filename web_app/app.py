@@ -15,7 +15,7 @@ PROFILES = {
     "image": {
         "name": "Image Display",
         "icon": "🖼️",
-        "script": "display-image.py"
+        "script": "display_image.py"
     },
     "renderfarm": {
         "name": "Renderfarm Monitor",
@@ -111,14 +111,14 @@ def profile_page(profile_key):
 # GET loads current image name (if set) and lists all uploaded images
 # POST either uploads, displays or deletes.
 # Note that only .png and .jpg/.jpeg are supported for uploads
-# lastly, renders display-image.html
+# lastly, renders display_image.html
 @app.route("/profile/image", methods=["GET", "POST"])
 def profile_image():
     # TODO: make all paths relative
     # UPLOAD_FOLDER = "/home/pi/pipeline-project-AnuKritiW/uploads"
     UPLOAD_FOLDER = os.path.join(app.root_path, "static/uploads")
     CURRENT_IMAGE_FILE = "/home/pi/pipeline-project-AnuKritiW/web_app/current_image.txt"
-    DISPLAY_SCRIPT = "/home/pi/pipeline-project-AnuKritiW/scripts/display-image.py"
+    DISPLAY_SCRIPT = "/home/pi/pipeline-project-AnuKritiW/scripts/display_image.py"
 
     message = ""
     current_image = ""
@@ -191,7 +191,7 @@ def profile_image():
         return redirect(request.path)
 
     return render_template(
-        "display-image.html",
+        "display_image.html",
         images=images,
         current_image=current_image,
         message=message,
