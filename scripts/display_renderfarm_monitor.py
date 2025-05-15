@@ -96,7 +96,9 @@ def display_render_farm():
 
             # Fill status cell background
             status_text = status.capitalize()
-            status_w, status_h = draw.textsize(status_text, font=font_data)
+            bbox = draw.textbbox((0, 0), status_text, font=font_data)
+            status_w = bbox[2] - bbox[0]
+            status_h = bbox[3] - bbox[1]
             padding = 4
             status_box = [
                 col_status - padding,
@@ -118,7 +120,9 @@ def display_render_farm():
             draw.rectangle([bar_x, bar_y, bar_x + fill_width, bar_y + bar_height], fill=bar_color)
 
             percent_text = f"{progress}%"
-            w, h = draw.textsize(percent_text, font=font_data)
+            bbox = draw.textbbox((0, 0), percent_text, font=font_data)
+            w = bbox[2] - bbox[0]
+            h = bbox[3] - bbox[1]
             text_x = bar_x + (bar_width - w) // 2
             text_y = bar_y + (bar_height - h) // 2
             draw.text((text_x, text_y), percent_text, fill=WHITE if progress > 60 else BLACK, font=font_data)
