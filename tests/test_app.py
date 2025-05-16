@@ -137,7 +137,16 @@ class TestImageRoutes:
         assert response.status_code == 200
         assert b"Invalid file type" in response.data  # Should trigger the invalid type branch
 
-    # TODO: Test repeat file upload
+    def test_repeat_file_upload(self, mock_uploads, client):
+        with patch("web_app.app.os.listdir", return_value=["test.jpg"]), \
+            patch("web_app.app.os.path.exists", return_value=True):
+            data = {
+                "action": "upload",
+                "image": (io.BytesIO(b"duplicate data"), "test.jpg")
+            }
+            response = client.post("/profile/image", data=data, content_type="multipart/form-data")
+            assert response.status_code == 200
+            assert b"already exists" in response.data
 
 """Renderfarm Routes"""
 #Fixtures
