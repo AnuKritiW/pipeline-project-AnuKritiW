@@ -47,4 +47,5 @@ def show_pipeline_splash():
     clear_script = os.path.join(script_dir, 'clear_image_info.py')
     subprocess.run(['python3', clear_script])
 
-show_pipeline_splash()
+if __name__ == "__main__":
+    show_pipeline_splash()
