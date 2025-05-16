@@ -80,27 +80,15 @@ class TestImageRoutes:
         assert response.status_code == 200
         assert b"Image Display" in response.data
 
-    # test POST /profile/image to upload an image
-    def test_image_upload_valid(self, mock_uploads, client):
-        with patch('web_app.app.os.listdir', return_value=["test.jpg"]):
-            data = {
-                "action": "upload",
-                "image": (io.BytesIO(b"fake image data"), "test.jpg")
-            }
+    @pytest.mark.parametrize("filename, content, expected_text", [
+        ("test.jpg", b"fake image data", b"Uploaded"),          # test POST /profile/image to upload an image
+        ("test.txt", b"fake file data", b"Invalid file type"),  # test POST /profile/image to upload an invalid file
+    ])
+    def test_image_upload_variants(mock_uploads, client, filename, content, expected_text):
+        with patch('web_app.app.os.listdir', return_value=[filename]):
+            data = {"action": "upload", "image": (io.BytesIO(content), filename)}
             response = client.post("/profile/image", data=data, content_type='multipart/form-data')
-            assert response.status_code == 200
-            assert b"Uploaded" in response.data
-
-    # test POST /profile/image to upload an invalid file
-    def test_image_upload_invalid_filetype(self, mock_uploads, client):
-        with patch('web_app.app.os.listdir', return_value=["test.txt"]):
-            data = {
-                "action": "upload",
-                "image": (io.BytesIO(b"fake file data"), "test.txt")
-            }
-            response = client.post("/profile/image", data=data, content_type='multipart/form-data')
-            assert response.status_code == 200
-            assert b"Invalid file type" in response.data
+            assert expected_text in response.data
 
     # test POST /profile/image to display an image
     @patch('builtins.open', new_callable=mock_open)
@@ -233,15 +221,15 @@ class TestRenderfarmRoutes:
         mock_popen.assert_any_call(["pkill", "-f", "simulate_render_jobs.py"])
 
     # Tests POST /profile/renderfarm update filter
+    @pytest.mark.parametrize("filter_data", [
+        {"filter_user": "anu", "filter_project": "cosmic-journey", "filter_status": "rendering", "filter_tool": "RenderMan"},
+        {"filter_user": "", "filter_project": "deep-sea", "filter_status": "waiting", "filter_tool": "Redshift"},
+        {"filter_user": "marie", "filter_project": "", "filter_status": "", "filter_tool": ""},
+        {"filter_user": "", "filter_project": "", "filter_status": "", "filter_tool": ""},
+    ])
     @patch('web_app.app.json.dump')
-    def test_renderfarm_update_filter(self, mock_json_dump, mock_popen, client, patch_renderfarm_context):
-        data = {
-            "action": "update_filter",
-            "filter_user": "anu",
-            "filter_project": "cosmic-journey",
-            "filter_tool": "RenderMan",
-            "filter_status": "rendering"
-        }
+    def test_renderfarm_update_filter(self, mock_json_dump, mock_popen, client, patch_renderfarm_context, filter_data):
+        data = {"action": "update_filter", **filter_data}
         response = client.post("/profile/renderfarm", data=data)
         assert response.status_code == 302
         assert mock_json_dump.called
