@@ -27,4 +27,4 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest --cov=web_app tests/
+        pytest --cov=web_app --cov=scripts tests/
