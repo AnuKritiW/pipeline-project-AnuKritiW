@@ -91,153 +91,157 @@ def mock_popen():
         yield mock
 
 """General Routes"""
-# Test home route
-def test_home_page(client):
-    response = client.get("/")          # GET request to the home page
-    assert response.status_code == 200  # Check response status code is 200 (OK)
-    assert b"PiPeline" in response.data # Check page contains text "PiPeline"
+class TestGeneralRoutes:
+    # Test home route
+    def test_home_page(self, client):
+        response = client.get("/")          # GET request to the home page
+        assert response.status_code == 200  # Check response status code is 200 (OK)
+        assert b"PiPeline" in response.data # Check page contains text "PiPeline"
 
-# Test invalid profile route
-def test_invalid_profile(client):
-    response = client.get("/profile/invalidkey")
-    assert response.status_code == 404
+    # Test invalid profile route
+    def test_invalid_profile(self, client):
+        response = client.get("/profile/invalidkey")
+        assert response.status_code == 404
 
 """Stats Routes"""
-# Tests GET for /profile/stats
-def test_profile_stats_get(client):
-    response = client.get("/profile/stats")
-    assert response.status_code == 200
-    assert b"System Stats" in response.data
+class TestStatsRoutes:
+    # Tests GET for /profile/stats
+    def test_profile_stats_get(self, client):
+        response = client.get("/profile/stats")
+        assert response.status_code == 200
+        assert b"System Stats" in response.data
 
-# test POST /profile/stats with "run" action
-def test_profile_run_post(mock_opens, client):
-    mock_open_file, mock_popen = mock_opens
-    response = client.post("/profile/stats", data={"action": "run"}) # simulate submitting a POST request -- clicking 'Run'
-    assert response.status_code == 302                               # Should redirect
-    mock_popen.assert_called_once()
-    assert mock_open_file.called
+    # test POST /profile/stats with "run" action
+    def test_profile_run_post(self, mock_opens, client):
+        mock_open_file, mock_popen = mock_opens
+        response = client.post("/profile/stats", data={"action": "run"}) # simulate submitting a POST request -- clicking 'Run'
+        assert response.status_code == 302                               # Should redirect
+        mock_popen.assert_called_once()
+        assert mock_open_file.called
 
-# test POST /profile/stats with "stop" action
-# "Stop" button correctly calls pkill and clears the profile
-def test_profile_stop_post(mock_opens, client):
-    mock_open_file, mock_popen = mock_opens
-    response = client.post("/profile/stats", data={"action": "stop"})
-    assert response.status_code == 302  # Should redirect
-    mock_popen.assert_called_once()
-    assert mock_open_file.called
+    # test POST /profile/stats with "stop" action
+    # "Stop" button correctly calls pkill and clears the profile
+    def test_profile_stop_post(self, mock_opens, client):
+        mock_open_file, mock_popen = mock_opens
+        response = client.post("/profile/stats", data={"action": "stop"})
+        assert response.status_code == 302  # Should redirect
+        mock_popen.assert_called_once()
+        assert mock_open_file.called
 
 """Image Routes"""
-# Test GET /profile/image
-def test_image_page_get(client):
-    response = client.get("/profile/image")
-    assert response.status_code == 200
-    assert b"Image Display" in response.data
-
-# test POST /profile/image to upload an image
-def test_image_upload_valid(mock_uploads, client):
-    with patch('web_app.app.os.listdir', return_value=["test.jpg"]):
-        data = {
-            "action": "upload",
-            "image": (io.BytesIO(b"fake image data"), "test.jpg")
-        }
-        response = client.post("/profile/image", data=data, content_type='multipart/form-data')
+class TestImageRoutes:
+    # Test GET /profile/image
+    def test_image_page_get(self, client):
+        response = client.get("/profile/image")
         assert response.status_code == 200
-        assert b"Uploaded" in response.data
+        assert b"Image Display" in response.data
 
-# test POST /profile/image to upload an invalid file
-def test_image_upload_invalid_filetype(mock_uploads, client):
-    with patch('web_app.app.os.listdir', return_value=["test.txt"]):
-        data = {
-            "action": "upload",
-            "image": (io.BytesIO(b"fake file data"), "test.txt")
-        }
-        response = client.post("/profile/image", data=data, content_type='multipart/form-data')
+    # test POST /profile/image to upload an image
+    def test_image_upload_valid(self, mock_uploads, client):
+        with patch('web_app.app.os.listdir', return_value=["test.jpg"]):
+            data = {
+                "action": "upload",
+                "image": (io.BytesIO(b"fake image data"), "test.jpg")
+            }
+            response = client.post("/profile/image", data=data, content_type='multipart/form-data')
+            assert response.status_code == 200
+            assert b"Uploaded" in response.data
+
+    # test POST /profile/image to upload an invalid file
+    def test_image_upload_invalid_filetype(self, mock_uploads, client):
+        with patch('web_app.app.os.listdir', return_value=["test.txt"]):
+            data = {
+                "action": "upload",
+                "image": (io.BytesIO(b"fake file data"), "test.txt")
+            }
+            response = client.post("/profile/image", data=data, content_type='multipart/form-data')
+            assert response.status_code == 200
+            assert b"Invalid file type" in response.data
+
+    # test POST /profile/image to display an image
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('web_app.app.subprocess.run')
+    def test_image_display(self, mock_run, mock_open_file, mock_uploads, client):
+        with patch('web_app.app.os.listdir', return_value=["test.jpg"]):
+            data = {
+                "action": "display",
+                "selected_image": "test.jpg"
+            }
+            response = client.post("/profile/image", data=data)
+            assert response.status_code == 200
+            assert b"Now displaying" in response.data
+            mock_run.assert_called_once()
+            assert mock_open_file.call_count == 3
+
+    # test deleting an image
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('web_app.app.os.remove')
+    def test_image_delete(self, mock_remove, mock_open_file, mock_uploads, client):
+        with patch('web_app.app.os.listdir', return_value=["test.jpg"]):
+            data = {
+                "action": "delete",
+                "delete_image": "test.jpg"
+            }
+            response = client.post("/profile/image", data=data)
+            assert response.status_code == 200
+            assert b"Deleted" in response.data
+            mock_remove.assert_called_once()
+            assert mock_open_file.call_count == 2
+
+    # test except CalledProcessError block if subprocess.run fails
+    @patch('builtins.open', new_callable=mock_open)
+    @patch('web_app.app.subprocess.run', side_effect=subprocess.CalledProcessError(1, ['fake']))
+    def test_display_image_subprocess_failure(self, mock_run, mock_open_file, mock_uploads, client):
+        with patch('web_app.app.os.listdir', return_value=["test.jpg"]):
+            data = {"action": "display", "selected_image": "test.jpg"}
+            response = client.post("/profile/image", data=data)
+            assert response.status_code == 200
+            assert b"Failed to display image" in response.data
+
+    # Tests missing file during upload
+    def test_upload_missing_file(self, mock_uploads, client):
+        # No file included
+        response = client.post("/profile/image", data={"action": "upload"}, content_type='multipart/form-data')
         assert response.status_code == 200
-        assert b"Invalid file type" in response.data
+        assert b"Invalid file type" in response.data  # Should trigger the invalid type branch
 
-# test POST /profile/image to display an image
-@patch('builtins.open', new_callable=mock_open)
-@patch('web_app.app.subprocess.run')
-def test_image_display(mock_run, mock_open_file, mock_uploads, client):
-    with patch('web_app.app.os.listdir', return_value=["test.jpg"]):
-        data = {
-            "action": "display",
-            "selected_image": "test.jpg"
-        }
-        response = client.post("/profile/image", data=data)
-        assert response.status_code == 200
-        assert b"Now displaying" in response.data
-        mock_run.assert_called_once()
-        assert mock_open_file.call_count == 3
-
-# test deleting an image
-@patch('builtins.open', new_callable=mock_open)
-@patch('web_app.app.os.remove')
-def test_image_delete(mock_remove, mock_open_file, mock_uploads, client):
-    with patch('web_app.app.os.listdir', return_value=["test.jpg"]):
-        data = {
-            "action": "delete",
-            "delete_image": "test.jpg"
-        }
-        response = client.post("/profile/image", data=data)
-        assert response.status_code == 200
-        assert b"Deleted" in response.data
-        mock_remove.assert_called_once()
-        assert mock_open_file.call_count == 2
-
-# test except CalledProcessError block if subprocess.run fails
-@patch('builtins.open', new_callable=mock_open)
-@patch('web_app.app.subprocess.run', side_effect=subprocess.CalledProcessError(1, ['fake']))
-def test_display_image_subprocess_failure(mock_run, mock_open_file, mock_uploads, client):
-    with patch('web_app.app.os.listdir', return_value=["test.jpg"]):
-        data = {"action": "display", "selected_image": "test.jpg"}
-        response = client.post("/profile/image", data=data)
-        assert response.status_code == 200
-        assert b"Failed to display image" in response.data
-
-# Tests missing file during upload
-def test_upload_missing_file(mock_uploads, client):
-    # No file included
-    response = client.post("/profile/image", data={"action": "upload"}, content_type='multipart/form-data')
-    assert response.status_code == 200
-    assert b"Invalid file type" in response.data  # Should trigger the invalid type branch
-
-# TODO: Test repeat file upload
+    # TODO: Test repeat file upload
 
 """Renderfarm Routes"""
-# Test GET /profile/renderfarm
-def test_renderfarm_page_get(client, patch_renderfarm_context):
-    response = client.get("/profile/renderfarm")
-    assert response.status_code == 200
-    assert b"Render Farm Monitor" in response.data
+class TestRenderfarmRoutes:
+    # Test GET /profile/renderfarm
+    def test_renderfarm_page_get(self, client, patch_renderfarm_context):
+        response = client.get("/profile/renderfarm")
+        assert response.status_code == 200
+        assert b"Render Farm Monitor" in response.data
 
-# test POST /profile/renderfarm with "run" action
-def test_renderfarm_run(mock_popen, client, patch_renderfarm_context):
-    response = client.post("/profile/renderfarm", data={"action": "run"})
-    assert response.status_code == 302  # Redirect
-    assert mock_popen.call_count == 1   # simulate + monitor scripts
+    # test POST /profile/renderfarm with "run" action
+    def test_renderfarm_run(self, mock_popen, client, patch_renderfarm_context):
+        response = client.post("/profile/renderfarm", data={"action": "run"})
+        assert response.status_code == 302  # Redirect
+        assert mock_popen.call_count == 1   # simulate + monitor scripts
 
-# Tests POST /profile/renderfarm stop
-def test_renderfarm_stop(mock_popen, client, patch_renderfarm_context):
-    response = client.post("/profile/renderfarm", data={"action": "stop"})
-    assert response.status_code == 302
-    assert mock_popen.call_count == 2
-    mock_popen.assert_any_call(["pkill", "-f", "display_renderfarm_monitor.py"])
-    mock_popen.assert_any_call(["pkill", "-f", "simulate_render_jobs.py"])
+    # Tests POST /profile/renderfarm stop
+    def test_renderfarm_stop(self, mock_popen, client, patch_renderfarm_context):
+        response = client.post("/profile/renderfarm", data={"action": "stop"})
+        assert response.status_code == 302
+        assert mock_popen.call_count == 2
+        mock_popen.assert_any_call(["pkill", "-f", "display_renderfarm_monitor.py"])
+        mock_popen.assert_any_call(["pkill", "-f", "simulate_render_jobs.py"])
 
-# Tests POST /profile/renderfarm update filter
-@patch('web_app.app.json.dump')
-def test_renderfarm_update_filter(mock_json_dump, mock_popen, client, patch_renderfarm_context):
-    data = {
-        "action": "update_filter",
-        "filter_user": "anu",
-        "filter_project": "cosmic-journey",
-        "filter_tool": "RenderMan",
-        "filter_status": "rendering"
-    }
-    response = client.post("/profile/renderfarm", data=data)
-    assert response.status_code == 302
-    assert mock_json_dump.called
+    # Tests POST /profile/renderfarm update filter
+    @patch('web_app.app.json.dump')
+    def test_renderfarm_update_filter(self, mock_json_dump, mock_popen, client, patch_renderfarm_context):
+        data = {
+            "action": "update_filter",
+            "filter_user": "anu",
+            "filter_project": "cosmic-journey",
+            "filter_tool": "RenderMan",
+            "filter_status": "rendering"
+        }
+        response = client.post("/profile/renderfarm", data=data)
+        assert response.status_code == 302
+        assert mock_json_dump.called
 
 """Global Stop"""
 # test app correctly kills the script when users want to stop everything
