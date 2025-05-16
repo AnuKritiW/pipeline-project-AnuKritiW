@@ -2,24 +2,26 @@ import sys
 from PIL import Image
 from inky.inky_uc8159 import Inky  # explicitly use the Impression display
 
-inky = Inky()
-# TODO: add parameter on web app
-saturation = 0.5  # default
+def display_image(image_path, saturation=0.5):
+    inky = Inky()
 
-# Get image path from command line
-if len(sys.argv) < 2:
-    print("Usage: python display-image.py <image-path>")
-    sys.exit(1)
+    # Load image
+    image = Image.open(image_path)
 
-image_path = sys.argv[1]
+    # Resize to display resolution
+    # TODO: add paramter on web app
+    image = image.resize((inky.WIDTH, inky.HEIGHT))
 
-# Load image
-image = Image.open(image_path)
+    # Let Inky handle the conversion + display
+    inky.set_image(image, saturation=saturation)
+    inky.show()
 
-# Resize to display resolution
-# TODO: add paramter on web app
-image = image.resize(inky.resolution)
+if __name__ == "__main__":
+    # Get image path from command line
+    if len(sys.argv) < 2:
+        print("Usage: python display-image.py <image-path>")
+        sys.exit(1)
 
-# Let Inky handle the conversion + display
-inky.set_image(image, saturation=saturation)
-inky.show()
+    image_path = sys.argv[1]
+    display_image(image_path)
+
