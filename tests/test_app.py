@@ -7,32 +7,15 @@ from unittest.mock import patch, mock_open
 import io
 from web_app.app import app, stop_current_profile, PROFILES
 import subprocess
+import json
 
+"""Fixtures for the test suite"""
 @pytest.fixture
 def client():
     # create a mock HTTP client to make fake GET/POST requests
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client
-
-def test_home_page(client):
-    response = client.get("/")          # GET request to the home page
-    assert response.status_code == 200  # Check response status code is 200 (OK)
-    assert b"PiPeline" in response.data # Check page contains text "PiPeline"
-
-def test_invalid_profile(client):
-    response = client.get("/profile/invalidkey")
-    assert response.status_code == 404
-
-def test_profile_stats_get(client):
-    response = client.get("/profile/stats")
-    assert response.status_code == 200
-    assert b"System Stats" in response.data
-
-def test_image_page_get(client):
-    response = client.get("/profile/image")
-    assert response.status_code == 200
-    assert b"Image Display" in response.data
 
 @pytest.fixture
 def mock_opens():
@@ -41,6 +24,32 @@ def mock_opens():
     with patch('web_app.app.subprocess.Popen') as mock_popen, \
          patch('builtins.open', new_callable=mock_open) as mock_open_file:
         yield mock_open_file, mock_popen
+
+@pytest.fixture
+def mock_uploads():
+    with patch('web_app.app.os.makedirs'), \
+         patch('web_app.app.os.path.exists', return_value=True), \
+         patch('builtins.open', new_callable=mock_open) as mock_open_file:
+        yield mock_open_file
+
+"""General Routes"""
+# Test home route
+def test_home_page(client):
+    response = client.get("/")          # GET request to the home page
+    assert response.status_code == 200  # Check response status code is 200 (OK)
+    assert b"PiPeline" in response.data # Check page contains text "PiPeline"
+
+# Test invalid profile route
+def test_invalid_profile(client):
+    response = client.get("/profile/invalidkey")
+    assert response.status_code == 404
+
+"""Stats Routes"""
+# Tests GET for /profile/stats
+def test_profile_stats_get(client):
+    response = client.get("/profile/stats")
+    assert response.status_code == 200
+    assert b"System Stats" in response.data
 
 # test POST /profile/stats with "run" action
 def test_profile_run_post(mock_opens, client):
@@ -59,12 +68,12 @@ def test_profile_stop_post(mock_opens, client):
     mock_popen.assert_called_once()
     assert mock_open_file.called
 
-@pytest.fixture
-def mock_uploads():
-    with patch('web_app.app.os.makedirs'), \
-         patch('web_app.app.os.path.exists', return_value=True), \
-         patch('builtins.open', new_callable=mock_open) as mock_open_file:
-        yield mock_open_file
+"""Image Routes"""
+# Test GET /profile/image
+def test_image_page_get(client):
+    response = client.get("/profile/image")
+    assert response.status_code == 200
+    assert b"Image Display" in response.data
 
 # test POST /profile/image to upload an image
 def test_image_upload_valid(mock_uploads, client):
@@ -103,7 +112,7 @@ def test_image_display(mock_run, mock_open_file, mock_uploads, client):
         mock_run.assert_called_once()
         assert mock_open_file.call_count == 3
 
-# test POST /profile/image to delete an image
+# test deleting an image
 @patch('builtins.open', new_callable=mock_open)
 @patch('web_app.app.os.remove')
 def test_image_delete(mock_remove, mock_open_file, mock_uploads, client):
@@ -128,13 +137,16 @@ def test_display_image_subprocess_failure(mock_run, mock_open_file, mock_uploads
         assert response.status_code == 200
         assert b"Failed to display image" in response.data
 
-# test if no image is selected
+# Tests missing file during upload
 def test_upload_missing_file(mock_uploads, client):
     # No file included
     response = client.post("/profile/image", data={"action": "upload"}, content_type='multipart/form-data')
     assert response.status_code == 200
     assert b"Invalid file type" in response.data  # Should trigger the invalid type branch
 
+# TODO: Test repeat file upload
+
+"""Global Stop"""
 # test app correctly kills the script when users want to stop everything
 @patch("web_app.app.subprocess.Popen")
 @patch("builtins.open", new_callable=mock_open, read_data="renderfarm")
