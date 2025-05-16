@@ -33,6 +33,63 @@ def mock_uploads():
          patch('builtins.open', new_callable=mock_open) as mock_open_file:
         yield mock_open_file
 
+# Save the original open() function
+real_open = builtins.open
+
+# Custom open handler
+@pytest.fixture
+def renderfarm_mocked_open():
+    def _mocked_open(filepath, *args, **kwargs):
+        if filepath.endswith("selected_profile.txt"):
+            return mock_open(read_data="renderfarm")()
+
+        elif filepath.endswith("renderfarm_status.json"):
+            return io.StringIO("""[
+                {
+                    "job_id": 1001,
+                    "user": "anu",
+                    "project": "cosmic-journey",
+                    "shot": "sh045",
+                    "frames": "200–215",
+                    "status": "rendering",
+                    "tool": "RenderMan",
+                    "progress": 45
+                }
+            ]""")
+
+        elif filepath.endswith("renderfarm_filter.json"):
+            return io.StringIO("""{
+                "user": "",
+                "project": "",
+                "tool": "",
+                "status": ""
+            }""")
+
+        # Allow Flask to load templates normally
+        return real_open(filepath, *args, **kwargs)
+
+    return _mocked_open
+
+@pytest.fixture
+def patch_renderfarm_context(renderfarm_mocked_open):
+    # Start both patches
+    open_patch = patch("builtins.open", new=renderfarm_mocked_open)
+    exists_patch = patch("web_app.app.os.path.exists", return_value=True)
+
+    open_mock = open_patch.start()
+    exists_mock = exists_patch.start()
+
+    yield open_mock, exists_mock  # yield in case you want to assert on them later
+
+    # Stop both patches
+    open_patch.stop()
+    exists_patch.stop()
+
+@pytest.fixture
+def mock_popen():
+    with patch("web_app.app.subprocess.Popen") as mock:
+        yield mock
+
 """General Routes"""
 # Test home route
 def test_home_page(client):
@@ -148,61 +205,20 @@ def test_upload_missing_file(mock_uploads, client):
 # TODO: Test repeat file upload
 
 """Renderfarm Routes"""
-# Save the original open() function
-real_open = builtins.open
-
-# Custom open handler
-def mocked_open(filepath, *args, **kwargs):
-    if filepath.endswith("selected_profile.txt"):
-        return mock_open(read_data="renderfarm")()
-
-    elif filepath.endswith("renderfarm_status.json"):
-        return io.StringIO("""[
-            {
-                "job_id": 1001,
-                "user": "anu",
-                "project": "cosmic-journey",
-                "shot": "sh045",
-                "frames": "200–215",
-                "status": "rendering",
-                "tool": "RenderMan",
-                "progress": 45
-            }
-        ]""")
-
-    elif filepath.endswith("renderfarm_filter.json"):
-        return io.StringIO("""{
-            "user": "",
-            "project": "",
-            "status": ""
-        }""")
-
-    # Allow Flask to load templates normally
-    return real_open(filepath, *args, **kwargs)
-
 # Test GET /profile/renderfarm
-def test_renderfarm_page_get(client):
-    # Replaces all built-in file opening (globally) with custom mocked_open() function
-    with patch("builtins.open", new=mocked_open), \
-         patch("web_app.app.os.path.exists", return_value=True): # don't skip the file check
-        response = client.get("/profile/renderfarm")
-        assert response.status_code == 200
-        assert b"Render Farm Monitor" in response.data
+def test_renderfarm_page_get(client, patch_renderfarm_context):
+    response = client.get("/profile/renderfarm")
+    assert response.status_code == 200
+    assert b"Render Farm Monitor" in response.data
 
 # test POST /profile/renderfarm with "run" action
-@patch('web_app.app.subprocess.Popen')
-@patch('builtins.open', new_callable=mock_open, read_data="renderfarm")
-@patch('web_app.app.os.path.exists', return_value=True)
-def test_renderfarm_run(mock_exists, mock_open_file, mock_popen, client):
+def test_renderfarm_run(mock_popen, client, patch_renderfarm_context):
     response = client.post("/profile/renderfarm", data={"action": "run"})
     assert response.status_code == 302  # Redirect
     assert mock_popen.call_count == 1   # simulate + monitor scripts
 
 # Tests POST /profile/renderfarm stop
-@patch('web_app.app.subprocess.Popen')
-@patch('builtins.open', new_callable=mock_open, read_data="renderfarm")
-@patch('web_app.app.os.path.exists', return_value=True)
-def test_renderfarm_stop(mock_exists, mock_open_file, mock_popen, client):
+def test_renderfarm_stop(mock_popen, client, patch_renderfarm_context):
     response = client.post("/profile/renderfarm", data={"action": "stop"})
     assert response.status_code == 302
     assert mock_popen.call_count == 2
@@ -210,25 +226,21 @@ def test_renderfarm_stop(mock_exists, mock_open_file, mock_popen, client):
     mock_popen.assert_any_call(["pkill", "-f", "simulate_render_jobs.py"])
 
 # Tests POST /profile/renderfarm update filter
-@patch('web_app.app.subprocess.Popen')
-@patch('builtins.open', new_callable=mock_open)
-@patch('web_app.app.os.path.exists', return_value=True)
-def test_renderfarm_update_filter(mock_exists, mock_open_file, mock_popen, client):
-    with patch('web_app.app.json.dump') as mock_json_dump:
-        data = {
-            "action": "update_filter",
-            "filter_user": "anu",
-            "filter_project": "cosmic-journey",
-            "filter_status": "rendering",
-            "filter_tool": "RenderMan"
-        }
-        response = client.post("/profile/renderfarm", data=data)
-        assert response.status_code == 302
-        assert mock_json_dump.called
+@patch('web_app.app.json.dump')
+def test_renderfarm_update_filter(mock_json_dump, mock_popen, client, patch_renderfarm_context):
+    data = {
+        "action": "update_filter",
+        "filter_user": "anu",
+        "filter_project": "cosmic-journey",
+        "filter_tool": "RenderMan",
+        "filter_status": "rendering"
+    }
+    response = client.post("/profile/renderfarm", data=data)
+    assert response.status_code == 302
+    assert mock_json_dump.called
 
 """Global Stop"""
 # test app correctly kills the script when users want to stop everything
-@patch("web_app.app.subprocess.Popen")
 @patch("builtins.open", new_callable=mock_open, read_data="renderfarm")
 @patch("web_app.app.os.path.exists", return_value=True)
 def test_stop_current_profile(mock_exists, mock_open_file, mock_popen):
