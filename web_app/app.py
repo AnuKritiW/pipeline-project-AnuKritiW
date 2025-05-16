@@ -36,6 +36,8 @@ PROFILES = {
 
 # Stop current profile helper
 def stop_current_profile():
+    current_profile = None
+
     if os.path.exists(SELECTED_PROFILE_FILE):
         with open(SELECTED_PROFILE_FILE) as f:
             current_profile = f.read().strip()
@@ -269,8 +271,14 @@ def profile_renderfarm():
             message = "Filter updated."
             return redirect("/profile/renderfarm")
 
-    with open(os.path.join(DATA_DIR, 'renderfarm_status.json')) as f:
-        jobs = json.load(f)
+    jobs = []
+    status_path = os.path.join(DATA_DIR, "renderfarm_status.json")
+    if os.path.exists(status_path):
+        try:
+            with open(status_path) as f:
+                jobs = json.load(f)
+        except json.JSONDecodeError:
+            jobs = []
 
     users = sorted(set(job['user'] for job in jobs))
     projects = sorted(set(job['project'] for job in jobs))

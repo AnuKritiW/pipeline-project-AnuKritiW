@@ -1,14 +1,17 @@
-import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))) # Ensure web_app is on sys.path
+import sys
+import io
+import json
+import builtins
+import subprocess
+
+# Ensure web_app is on sys.path for imports to work
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import pytest
 from unittest.mock import patch, mock_open
-import io
-from web_app.app import app, stop_current_profile, PROFILES
-import subprocess
-import json
-import builtins
+from web_app.app import app, clear_session_files, stop_current_profile, PROFILES
+
 
 # Fixtures
 @pytest.fixture
@@ -38,6 +41,13 @@ class TestGeneralRoutes:
     def test_invalid_profile(self, client):
         response = client.get("/profile/invalidkey")
         assert response.status_code == 404
+
+    def test_index_post_stop_global(self, client):
+        with patch("web_app.app.os.path.exists", return_value=True), \
+            patch("web_app.app.open", mock_open(read_data="stats")), \
+            patch("web_app.app.subprocess.Popen"):
+            response = client.post("/", data={"stop_global": "1"})
+            assert response.status_code == 302
 
 """Stats Routes"""
 class TestStatsRoutes:
@@ -120,6 +130,14 @@ class TestImageRoutes:
             mock_remove.assert_called_once()
             assert mock_open_file.call_count == 2
 
+    # test error on deleting an image
+    @patch("web_app.app.os.remove", side_effect=Exception("disk full"))
+    def test_image_delete_failure(mock_remove, mock_uploads, client):
+        with patch("web_app.app.os.listdir", return_value=["test.jpg"]):
+            data = {"action": "delete", "delete_image": "test.jpg"}
+            response = client.post("/profile/image", data=data)
+            assert b"Error deleting" in response.data
+
     # test except CalledProcessError block if subprocess.run fails
     @patch('builtins.open', new_callable=mock_open)
     @patch('web_app.app.subprocess.run', side_effect=subprocess.CalledProcessError(1, ['fake']))
@@ -130,12 +148,21 @@ class TestImageRoutes:
             assert response.status_code == 200
             assert b"Failed to display image" in response.data
 
-    # Tests missing file during upload
-    def test_upload_missing_file(self, mock_uploads, client):
-        # No file included
-        response = client.post("/profile/image", data={"action": "upload"}, content_type='multipart/form-data')
-        assert response.status_code == 200
-        assert b"Invalid file type" in response.data  # Should trigger the invalid type branch
+    @pytest.mark.parametrize("filename, content, expected_text", [
+        ("test.jpg", b"fake image data", b"Uploaded"),
+        ("test.txt", b"fake file data", b"Invalid file type"),
+        ("test.gif", b"not allowed", b"Invalid file type"),
+        (None, None, b"Invalid file type"),  # No file uploaded at all
+    ])
+    def test_image_upload_variants(mock_uploads, client, filename, content, expected_text):
+        with patch("web_app.app.os.listdir", return_value=[]):
+            if filename is not None:
+                data = {"action": "upload", "image": (io.BytesIO(content), filename)}
+            else:
+                data = {"action": "upload"}  # No file key
+
+            response = client.post("/profile/image", data=data, content_type='multipart/form-data')
+            assert expected_text in response.data
 
     def test_repeat_file_upload(self, mock_uploads, client):
         with patch("web_app.app.os.listdir", return_value=["test.jpg"]), \
@@ -147,6 +174,14 @@ class TestImageRoutes:
             response = client.post("/profile/image", data=data, content_type="multipart/form-data")
             assert response.status_code == 200
             assert b"already exists" in response.data
+
+    def test_unknown_post_action_image(self, mock_uploads, client):
+        data = {"action": "foobar"}
+        response = client.post("/profile/image", data=data)
+        assert response.status_code == 200
+        assert b"Invalid file type" not in response.data
+        assert b"Now displaying" not in response.data
+        assert b"Deleted" not in response.data
 
 """Renderfarm Routes"""
 #Fixtures
@@ -243,6 +278,14 @@ class TestRenderfarmRoutes:
         assert response.status_code == 302
         assert mock_json_dump.called
 
+    # test fallback json handling
+    @patch("web_app.app.open", new_callable=mock_open, read_data="{ invalid json }")
+    @patch("web_app.app.os.path.exists", return_value=True)
+    @patch("web_app.app.subprocess.Popen")
+    def test_renderfarm_corrupted_filter_file(self, mock_popen, mock_exists, mock_open_file, client):
+        response = client.get("/profile/renderfarm")
+        assert response.status_code == 200
+
 """Global Stop"""
 # test app correctly kills the script when users want to stop everything
 @patch("builtins.open", new_callable=mock_open, read_data="renderfarm")
@@ -262,5 +305,31 @@ def test_stop_current_profile(mock_exists, mock_open_file, mock_popen):
 
     # Should clear the profile file
     assert mock_open_file.call_count >= 2  # read + write
+
+def test_stop_current_profile_file_missing():
+    with patch("web_app.app.os.path.exists", return_value=False), \
+         patch("web_app.app.subprocess.Popen") as mock_popen:
+        stopped_profile = stop_current_profile()
+        assert stopped_profile is None
+        mock_popen.assert_not_called()
+
+@patch("web_app.app.open", new_callable=mock_open)
+@patch("web_app.app.os.path.join", side_effect=lambda *args: "/mocked/path/renderfarm_filter.json")
+def test_clear_session_files_success(mock_join, mock_open_file):
+    clear_session_files()
+
+    # Should attempt to open three files total
+    assert mock_open_file.call_count == 3
+
+    opened_files = [call[0][0] for call in mock_open_file.call_args_list]
+    assert "selected_profile.txt" in opened_files[0]
+    assert "current_image.txt" in opened_files[1]
+    assert "renderfarm_filter.json" in opened_files[2]
+
+@patch("web_app.app.open", side_effect=Exception("disk error"))
+def test_clear_session_files_error(mock_open_file):
+
+    # Should not crash, just print errors
+    clear_session_files()
 
 # to run `pytest tests/``
