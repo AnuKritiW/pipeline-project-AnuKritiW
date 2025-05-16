@@ -77,11 +77,6 @@ def profile_page(profile_key):
     if profile_key not in PROFILES:
         return "Invalid profile", 404
 
-    if profile_key == "image":
-        return redirect("/profile/image")
-    elif profile_key == "renderfarm":
-        return redirect("/profile/renderfarm")
-
     script_path = os.path.join(SCRIPT_DIR, PROFILES[profile_key]["script"])
     name = PROFILES[profile_key]["name"]
     message = ""
