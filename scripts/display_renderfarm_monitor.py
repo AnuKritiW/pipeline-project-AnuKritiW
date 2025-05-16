@@ -5,7 +5,7 @@ import json
 import time
 import subprocess
 
-def display_render_farm():
+def display_render_farm(run_once=False):
     # setup display
     inky_display = auto()
     inky_display.set_border(inky_display.WHITE)
@@ -144,6 +144,9 @@ def display_render_farm():
         inky_display.set_image(img)
         inky_display.show()
 
+        if run_once:
+            break
+
         time.sleep(120) # refresh every 2 min
 
 def simulate_render_jobs():
@@ -151,6 +154,7 @@ def simulate_render_jobs():
     sim_script_path = os.path.join(script_dir, "simulate_render_jobs.py")
     subprocess.Popen(["python3", sim_script_path])
 
-simulate_render_jobs()
-display_render_farm()
+if __name__ == "__main__":
+    simulate_render_jobs()
+    display_render_farm()
 
