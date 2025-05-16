@@ -1,31 +1,7 @@
-import os
-import sys
-import builtins
-import json
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
 import pytest
 from unittest.mock import patch, mock_open, MagicMock
 
 import scripts.display_renderfarm_monitor as monitor
-
-# TODO: consider moving fixture into external file to share with test_app.py?
-@pytest.fixture
-def mock_render_data():
-    # Sample job JSON and filters
-    job_data = json.dumps([
-        {
-            "user": "anu",
-            "project": "cosmic-journey",
-            "shot": "sh045",
-            "frames": "200–215",
-            "status": "rendering",
-            "tool": "RenderMan",
-            "progress": 45
-        }
-    ])
-    filter_data = json.dumps({"user": "", "project": "", "status": "", "tool": ""})
-    return job_data, filter_data
 
 # run one cycle of logic in display_render_farm
 # load the job and filter data; update the 'display', exit cleanly
@@ -35,8 +11,8 @@ def mock_render_data():
 @patch("scripts.display_renderfarm_monitor.Image")       # Avoid real image creation
 @patch("scripts.display_renderfarm_monitor.auto")        # mock inky screen
 @patch("builtins.open", new_callable=mock_open)          # mock file reads
-def test_display_render_once(mock_file, mock_auto, mock_image, mock_draw, mock_sleep, mock_render_data):
-    job_data, filter_data = mock_render_data
+def test_display_render_once(mock_file, mock_auto, mock_image, mock_draw, mock_sleep, mock_job_data):
+    job_data, filter_data = mock_job_data
 
     # mock file reads
     # first time open() is called, return the first item and so on. 
