@@ -91,12 +91,19 @@ class TestImageRoutes:
         assert b"Image Display" in response.data
 
     @pytest.mark.parametrize("filename, content, expected_text", [
-        ("test.jpg", b"fake image data", b"Uploaded"),          # test POST /profile/image to upload an image
-        ("test.txt", b"fake file data", b"Invalid file type"),  # test POST /profile/image to upload an invalid file
+        ("test.jpg", b"fake image data", b"Uploaded"),
+        ("test.txt", b"fake file data", b"Invalid file type"),
+        ("test.gif", b"not allowed", b"Invalid file type"),
+        (None, None, b"Invalid file type"),  # No file uploaded at all
     ])
-    def test_image_upload_variants(mock_uploads, client, filename, content, expected_text):
-        with patch('web_app.app.os.listdir', return_value=[filename]):
-            data = {"action": "upload", "image": (io.BytesIO(content), filename)}
+    @patch("werkzeug.datastructures.FileStorage.save") # prevents Flask from saving a real file
+    def test_image_upload_variants(mock_save, mock_uploads, client, filename, content, expected_text):
+        with patch("web_app.app.os.listdir", return_value=[]):
+            if filename is not None:
+                data = {"action": "upload", "image": (io.BytesIO(content), filename)}
+            else:
+                data = {"action": "upload"}  # No file key
+
             response = client.post("/profile/image", data=data, content_type='multipart/form-data')
             assert expected_text in response.data
 
@@ -147,22 +154,6 @@ class TestImageRoutes:
             response = client.post("/profile/image", data=data)
             assert response.status_code == 200
             assert b"Failed to display image" in response.data
-
-    @pytest.mark.parametrize("filename, content, expected_text", [
-        ("test.jpg", b"fake image data", b"Uploaded"),
-        ("test.txt", b"fake file data", b"Invalid file type"),
-        ("test.gif", b"not allowed", b"Invalid file type"),
-        (None, None, b"Invalid file type"),  # No file uploaded at all
-    ])
-    def test_image_upload_variants(mock_uploads, client, filename, content, expected_text):
-        with patch("web_app.app.os.listdir", return_value=[]):
-            if filename is not None:
-                data = {"action": "upload", "image": (io.BytesIO(content), filename)}
-            else:
-                data = {"action": "upload"}  # No file key
-
-            response = client.post("/profile/image", data=data, content_type='multipart/form-data')
-            assert expected_text in response.data
 
     def test_repeat_file_upload(self, mock_uploads, client):
         with patch("web_app.app.os.listdir", return_value=["test.jpg"]), \
