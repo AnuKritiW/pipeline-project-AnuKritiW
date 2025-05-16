@@ -148,8 +148,11 @@ def profile_image():
             uploaded_file = request.files.get("image")
             if uploaded_file and uploaded_file.filename.lower().endswith((".png", ".jpg", ".jpeg")):
                 filepath = os.path.join(STATIC_UPLOADS, uploaded_file.filename)
-                uploaded_file.save(filepath)
-                message = f"Uploaded {uploaded_file.filename}"
+                if os.path.exists(filepath):
+                    message = f"{uploaded_file.filename} already exists."
+                else:
+                    uploaded_file.save(filepath)
+                    message = f"Uploaded {uploaded_file.filename}"
             else:
                 message = "Invalid file type. Use .png, .jpg, or .jpeg."
 
