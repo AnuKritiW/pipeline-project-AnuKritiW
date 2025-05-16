@@ -10,7 +10,7 @@ import subprocess
 import json
 import builtins
 
-"""Fixtures for the test suite"""
+# Fixtures
 @pytest.fixture
 def client():
     # create a mock HTTP client to make fake GET/POST requests
@@ -19,76 +19,12 @@ def client():
         yield client
 
 @pytest.fixture
-def mock_opens():
+def mock_open_and_popen():
     # temporarily replace/mock subprocess.Popen
     # temporarily replace/mock open
     with patch('web_app.app.subprocess.Popen') as mock_popen, \
          patch('builtins.open', new_callable=mock_open) as mock_open_file:
         yield mock_open_file, mock_popen
-
-@pytest.fixture
-def mock_uploads():
-    with patch('web_app.app.os.makedirs'), \
-         patch('web_app.app.os.path.exists', return_value=True), \
-         patch('builtins.open', new_callable=mock_open) as mock_open_file:
-        yield mock_open_file
-
-# Save the original open() function
-real_open = builtins.open
-
-# Custom open handler
-@pytest.fixture
-def renderfarm_mocked_open():
-    def _mocked_open(filepath, *args, **kwargs):
-        if filepath.endswith("selected_profile.txt"):
-            return mock_open(read_data="renderfarm")()
-
-        elif filepath.endswith("renderfarm_status.json"):
-            return io.StringIO("""[
-                {
-                    "job_id": 1001,
-                    "user": "anu",
-                    "project": "cosmic-journey",
-                    "shot": "sh045",
-                    "frames": "200–215",
-                    "status": "rendering",
-                    "tool": "RenderMan",
-                    "progress": 45
-                }
-            ]""")
-
-        elif filepath.endswith("renderfarm_filter.json"):
-            return io.StringIO("""{
-                "user": "",
-                "project": "",
-                "tool": "",
-                "status": ""
-            }""")
-
-        # Allow Flask to load templates normally
-        return real_open(filepath, *args, **kwargs)
-
-    return _mocked_open
-
-@pytest.fixture
-def patch_renderfarm_context(renderfarm_mocked_open):
-    # Start both patches
-    open_patch = patch("builtins.open", new=renderfarm_mocked_open)
-    exists_patch = patch("web_app.app.os.path.exists", return_value=True)
-
-    open_mock = open_patch.start()
-    exists_mock = exists_patch.start()
-
-    yield open_mock, exists_mock  # yield in case you want to assert on them later
-
-    # Stop both patches
-    open_patch.stop()
-    exists_patch.stop()
-
-@pytest.fixture
-def mock_popen():
-    with patch("web_app.app.subprocess.Popen") as mock:
-        yield mock
 
 """General Routes"""
 class TestGeneralRoutes:
@@ -112,8 +48,8 @@ class TestStatsRoutes:
         assert b"System Stats" in response.data
 
     # test POST /profile/stats with "run" action
-    def test_profile_run_post(self, mock_opens, client):
-        mock_open_file, mock_popen = mock_opens
+    def test_profile_run_post(self, mock_open_and_popen, client):
+        mock_open_file, mock_popen = mock_open_and_popen
         response = client.post("/profile/stats", data={"action": "run"}) # simulate submitting a POST request -- clicking 'Run'
         assert response.status_code == 302                               # Should redirect
         mock_popen.assert_called_once()
@@ -121,14 +57,22 @@ class TestStatsRoutes:
 
     # test POST /profile/stats with "stop" action
     # "Stop" button correctly calls pkill and clears the profile
-    def test_profile_stop_post(self, mock_opens, client):
-        mock_open_file, mock_popen = mock_opens
+    def test_profile_stop_post(self, mock_open_and_popen, client):
+        mock_open_file, mock_popen = mock_open_and_popen
         response = client.post("/profile/stats", data={"action": "stop"})
         assert response.status_code == 302  # Should redirect
         mock_popen.assert_called_once()
         assert mock_open_file.called
 
 """Image Routes"""
+# Fixtures
+@pytest.fixture
+def mock_uploads():
+    with patch('web_app.app.os.makedirs'), \
+         patch('web_app.app.os.path.exists', return_value=True), \
+         patch('builtins.open', new_callable=mock_open) as mock_open_file:
+        yield mock_open_file
+
 class TestImageRoutes:
     # Test GET /profile/image
     def test_image_page_get(self, client):
@@ -208,6 +152,65 @@ class TestImageRoutes:
     # TODO: Test repeat file upload
 
 """Renderfarm Routes"""
+#Fixtures
+
+# Save the original open() function
+real_open = builtins.open
+
+# Custom open handler
+@pytest.fixture
+def renderfarm_mocked_open():
+    def _mocked_open(filepath, *args, **kwargs):
+        if filepath.endswith("selected_profile.txt"):
+            return mock_open(read_data="renderfarm")()
+
+        elif filepath.endswith("renderfarm_status.json"):
+            return io.StringIO("""[
+                {
+                    "job_id": 1001,
+                    "user": "anu",
+                    "project": "cosmic-journey",
+                    "shot": "sh045",
+                    "frames": "200–215",
+                    "status": "rendering",
+                    "tool": "RenderMan",
+                    "progress": 45
+                }
+            ]""")
+
+        elif filepath.endswith("renderfarm_filter.json"):
+            return io.StringIO("""{
+                "user": "",
+                "project": "",
+                "tool": "",
+                "status": ""
+            }""")
+
+        # Allow Flask to load templates normally
+        return real_open(filepath, *args, **kwargs)
+
+    return _mocked_open
+
+@pytest.fixture
+def patch_renderfarm_context(renderfarm_mocked_open):
+    # Start both patches
+    open_patch = patch("builtins.open", new=renderfarm_mocked_open)
+    exists_patch = patch("web_app.app.os.path.exists", return_value=True)
+
+    open_mock = open_patch.start()
+    exists_mock = exists_patch.start()
+
+    yield open_mock, exists_mock  # yield in case you want to assert on them later
+
+    # Stop both patches
+    open_patch.stop()
+    exists_patch.stop()
+
+@pytest.fixture
+def mock_popen():
+    with patch("web_app.app.subprocess.Popen") as mock:
+        yield mock
+
 class TestRenderfarmRoutes:
     # Test GET /profile/renderfarm
     def test_renderfarm_page_get(self, client, patch_renderfarm_context):
