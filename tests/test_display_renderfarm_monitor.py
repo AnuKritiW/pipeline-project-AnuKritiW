@@ -11,7 +11,7 @@ import scripts.display_renderfarm_monitor as monitor
 @patch("scripts.display_renderfarm_monitor.Image")       # Avoid real image creation
 @patch("scripts.display_renderfarm_monitor.auto")        # mock inky screen
 @patch("builtins.open", new_callable=mock_open)          # mock file reads
-def test_display_render_once(mock_file, mock_auto, mock_image, mock_draw, mock_sleep, mock_job_data):
+def test_display_render_once(mock_file, mock_auto, mock_image, mock_draw, mock_sleep, mock_job_data, mock_inky_display):
     job_data, filter_data = mock_job_data
 
     # mock file reads
@@ -21,21 +21,10 @@ def test_display_render_once(mock_file, mock_auto, mock_image, mock_draw, mock_s
         mock_open(read_data=filter_data).return_value   # return filter_data
     ]
 
-    # mock inky display object
-    fake_display = MagicMock()
-    fake_display.WHITE = 1
-    fake_display.RED = 2
-    fake_display.GREEN = 3
-    fake_display.YELLOW = 4
-    fake_display.BLACK = 5
-    fake_display.ORANGE = 6
-    fake_display.BLUE = 7
-    fake_display.WIDTH = 250
-    fake_display.HEIGHT = 122
-    mock_auto.return_value = fake_display
+    mock_auto.return_value = mock_inky_display
 
     monitor.display_render_farm(run_once=True)
 
     # assertions to confirm that display was called
-    fake_display.set_image.assert_called_once()
-    fake_display.show.assert_called_once()
+    mock_inky_display.set_image.assert_called_once()
+    mock_inky_display.show.assert_called_once()
