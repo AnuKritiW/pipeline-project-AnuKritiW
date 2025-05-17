@@ -10,7 +10,7 @@
     <!-- 🟢 Status Card -->
     <div class="status-card">
       {% if current_profile %}
-        🟢 Currently Running: {{ current_profile }}
+        🟢 Currently Running: {{ current_profile_name }}
         <form method="POST" style="display:inline">
           <button type="submit" class="btn btn-red" name="stop_global" value="1" style="margin-left: 1em;">⏹ Stop</button>
         </form>

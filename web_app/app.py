@@ -110,12 +110,18 @@ def clear_session_files():
 @app.route("/", methods=["GET", "POST"])
 def index():
     current_profile = get_current_profile()
+    current_profile_name = PROFILES.get(current_profile, {}).get("name", current_profile)
 
     if request.method == "POST" and request.form.get("stop_global"):
         stop_current_profile()
         return redirect(request.path)
 
-    return render_template("index.html", profiles=PROFILES, current_profile=current_profile)
+    return render_template(
+        "index.html",
+        profiles=PROFILES,
+        current_profile=current_profile,
+        current_profile_name=current_profile_name
+    )
 
 # Route: Stats
 # creates a generic profile page if no special profile has been created for it
@@ -151,13 +157,16 @@ def profile_stats():
             message = f"{name} stopped."
             return redirect(f"/profile/{profile_key}")
 
+    current_profile_name = PROFILES.get(current_profile, {}).get("name", current_profile)
+
     return render_template(
         "display-generic.html",
         profile_name=name,
         profile_key=profile_key,
         running=running,
         message=message,
-        current_profile=current_profile
+        current_profile=current_profile,
+        current_profile_name=current_profile_name
     )
 
 # Route: Image Profile
@@ -238,12 +247,15 @@ def profile_image():
         stop_current_profile()
         return redirect(request.path)
 
+    current_profile_name = PROFILES.get(current_profile, {}).get("name", current_profile)
+
     return render_template(
         "display_image.html",
         images=images,
         current_image=current_image,
         message=message,
-        current_profile=current_profile
+        current_profile=current_profile,
+        current_profile_name=current_profile_name
     )
 
 # Route: Renderfarm profile
@@ -333,6 +345,8 @@ def profile_renderfarm():
         "status": filter_data.get("status", "")
     }
 
+    current_profile_name = PROFILES.get(current_profile, {}).get("name", current_profile)
+
     return render_template(
         "display-renderfarm.html",
         profile_name=name,
@@ -343,7 +357,8 @@ def profile_renderfarm():
         users=users,
         projects=projects,
         tools=tools,
-        current_filter=current_filter
+        current_filter=current_filter,
+        current_profile_name=current_profile_name
     )
 
 # ==================== MAIN ====================
