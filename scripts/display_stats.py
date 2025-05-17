@@ -3,6 +3,7 @@ import datetime
 import json
 import time
 import os
+import sys
 import subprocess
 
 # Try to import Inky library (only works on Raspberry Pi)
