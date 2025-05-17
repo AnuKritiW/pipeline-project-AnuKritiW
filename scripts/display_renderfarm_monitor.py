@@ -44,6 +44,9 @@ def display_render_farm(run_once=False):
         "waiting": ORANGE
     }
 
+    clear_script = os.path.join(script_dir, 'clear_image_info.py')
+    subprocess.run(['python3', clear_script])
+
     while True:
         print("LOOP")
         img = Image.new("P", (WIDTH, HEIGHT), color=WHITE)
