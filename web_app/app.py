@@ -52,7 +52,9 @@ def can_start_new_profile(requested_profile):
        Otherwise, return (False, current_running_profile)."""
     current = get_current_profile()
     if current and current != requested_profile:
-        return False, current
+        requested_name = PROFILES.get(requested_profile, {}).get("name", requested_profile)
+        current_name = PROFILES.get(current, {}).get("name", current)
+        return False, f"Cannot start {requested_name}. '{current_name}' is currently running."
     return True, None
 
 def kill_script(script_name):
@@ -136,10 +138,8 @@ def profile_stats():
 
         action = request.form.get("action")
         if action == "run":
-            can_start, current = can_start_new_profile(profile_key)
-            if not can_start:
-                message = f"Cannot start {name}. '{current}' is currently running."
-            else:
+            can_start, message = can_start_new_profile(profile_key)
+            if can_start:
                 launch_script(profile_key)
                 running = True
                 message = f"{name} started."
@@ -195,21 +195,23 @@ def profile_image():
 
         # Display selected image
         elif action == "display":
-            filename = request.form.get("selected_image")
-            image_path = os.path.join(STATIC_UPLOADS, filename)
+            can_start, message = can_start_new_profile("image")
+            if can_start:
+                filename = request.form.get("selected_image")
+                image_path = os.path.join(STATIC_UPLOADS, filename)
 
-            try:
-                subprocess.run([
-                    VENV_PYTHON,
-                    os.path.join(SCRIPT_DIR, PROFILES["image"]["script"]),
-                    image_path
-                ], check=True)  # check=True will raise CalledProcessError if fails
-                with open(CURRENT_IMAGE_FILE, "w") as f:
-                    f.write(filename)
-                current_image = filename
-                message = f"Now displaying {filename}"
-            except subprocess.CalledProcessError as e:
-                message = "Failed to display image. The display might be busy or another script is running."
+                try:
+                    subprocess.run([
+                        VENV_PYTHON,
+                        os.path.join(SCRIPT_DIR, PROFILES["image"]["script"]),
+                        image_path
+                    ], check=True)  # check=True will raise CalledProcessError if fails
+                    with open(CURRENT_IMAGE_FILE, "w") as f:
+                        f.write(filename)
+                    current_image = filename
+                    message = f"Now displaying {filename}"
+                except subprocess.CalledProcessError as e:
+                    message = "Failed to display image. The display might be busy or another script is running."
 
         # Delete selected image
         elif action == "delete":
@@ -258,10 +260,8 @@ def profile_renderfarm():
 
     if request.method == "POST":
         if request.form.get("action") == "run":
-            can_start, current = can_start_new_profile("renderfarm")
-            if not can_start:
-                message = f"Cannot start {name}. '{current}' is currently running."
-            else:
+            can_start, message = can_start_new_profile("renderfarm")
+            if can_start:
                 launch_script(profile_key)
                 running = True
                 message = f"{name} started."
