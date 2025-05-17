@@ -195,7 +195,7 @@ pytest tests/
 ```
 cd pipeline-project-AnuKritiW
 source ~/.virtualenvs/pimoroni/bin/activate
-pytest --cov=web_app tests/
+pytest --cov=web_app --cov=scripts --cov-report=term-missing tests/
 ```
 
 ### Continuous Integration with GitHub Actions
