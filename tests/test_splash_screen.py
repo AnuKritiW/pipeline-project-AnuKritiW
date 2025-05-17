@@ -1,8 +1,13 @@
 import pytest
+
+try:
+    import scripts.splash_screen as splash
+except ImportError:
+    pytest.skip("Skipping test: module not available in CI", allow_module_level=True)
+
 from unittest.mock import patch, mock_open, MagicMock
 
-import scripts.splash_screen as splash
-
+@pytest.mark.pi_only
 # run the splash screen logic once with all dependencies mocked
 # ensures text is drawn and image is displayed without triggering hardware or subprocess
 @patch("scripts.splash_screen.subprocess.run")           # avoid running clear_image_info.py

@@ -1,8 +1,13 @@
 import pytest
+
+try:
+    import scripts.display_renderfarm_monitor as monitor
+except ImportError:
+    pytest.skip("Skipping test: module not available in CI", allow_module_level=True)
+
 from unittest.mock import patch, mock_open, MagicMock
 
-import scripts.display_renderfarm_monitor as monitor
-
+@pytest.mark.pi_only
 # run one cycle of logic in display_render_farm
 # load the job and filter data; update the 'display', exit cleanly
 # note that this does not interact with the actual hardware or files
