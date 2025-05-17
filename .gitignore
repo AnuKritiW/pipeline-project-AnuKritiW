@@ -1,6 +1,6 @@
 /out
 *.txt
-!.github/workflows/requirements-ci.txt
+!*/*/requirements.txt
 /scripts/*.png
 /web_app/static/uploads
 */__pycache__/
