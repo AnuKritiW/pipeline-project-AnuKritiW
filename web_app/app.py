@@ -143,12 +143,13 @@ def profile_stats():
                 launch_script(profile_key)
                 running = True
                 message = f"{name} started."
+                return redirect(f"/profile/{profile_key}")
         elif action == "stop":
             kill_script(PROFILES[profile_key]["script"])
             open(SELECTED_PROFILE_FILE, "w").close()
             running = False
             message = f"{name} stopped."
-        return redirect(f"/profile/{profile_key}")
+            return redirect(f"/profile/{profile_key}")
 
     return render_template(
         "display-generic.html",
