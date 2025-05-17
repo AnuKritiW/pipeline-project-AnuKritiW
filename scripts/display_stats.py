@@ -11,10 +11,10 @@ try:
     from inky.auto import auto
     inky_display = auto()  # auto library, creates an instance of the class called inky_display
 except Exception as e:
+    inky_display = None
     print(f"[ERROR] Failed to initialize Inky display: {e}", file=sys.stderr)
-    sys.exit(1)
 
-if inky_display is None:
+if inky_display is None and __name__ == "__main__":
     print("[ERROR] Could not find Inky display. Exiting.", file=sys.stderr)
     sys.exit(1)
 
