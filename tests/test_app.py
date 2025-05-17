@@ -58,7 +58,8 @@ class TestStatsRoutes:
         assert b"System Stats" in response.data
 
     # test POST /profile/stats with "run" action
-    def test_profile_run_post(self, mock_open_and_popen, client):
+    @patch("web_app.app.subprocess.run", return_value=subprocess.CompletedProcess(args=["python3"], returncode=0))
+    def test_profile_run_post(self, mock_run, mock_open_and_popen, client):
         mock_open_file, mock_popen = mock_open_and_popen
         response = client.post("/profile/stats", data={"action": "run"}) # simulate submitting a POST request -- clicking 'Run'
         assert response.status_code == 302                               # Should redirect
@@ -120,7 +121,7 @@ class TestImageRoutes:
             assert response.status_code == 200
             assert b"Now displaying" in response.data
             mock_run.assert_called_once()
-            assert mock_open_file.call_count == 3
+            assert mock_open_file.call_count == 4
 
     # test deleting an image
     @patch('builtins.open', new_callable=mock_open)
@@ -242,7 +243,8 @@ class TestRenderfarmRoutes:
         assert b"Render Farm Monitor" in response.data
 
     # test POST /profile/renderfarm with "run" action
-    def test_renderfarm_run(self, mock_popen, client, patch_renderfarm_context):
+    @patch("web_app.app.subprocess.run", return_value=subprocess.CompletedProcess(args=["python3"], returncode=0))
+    def test_renderfarm_run(self, mock_run, mock_popen, client, patch_renderfarm_context):
         response = client.post("/profile/renderfarm", data={"action": "run"})
         assert response.status_code == 302  # Redirect
         assert mock_popen.call_count == 1   # simulate + monitor scripts
@@ -301,7 +303,7 @@ def test_stop_current_profile_file_missing():
     with patch("web_app.app.os.path.exists", return_value=False), \
          patch("web_app.app.subprocess.Popen") as mock_popen:
         stopped_profile = stop_current_profile()
-        assert stopped_profile is None
+        assert stopped_profile is ""
         mock_popen.assert_not_called()
 
 @patch("web_app.app.open", new_callable=mock_open)
