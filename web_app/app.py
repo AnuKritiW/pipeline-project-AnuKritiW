@@ -34,6 +34,16 @@ PROFILES = {
     },
 }
 
+def can_start_new_profile(requested_profile):
+    """Check if the requested profile can start, and return (True, None) if yes.
+       Otherwise, return (False, current_running_profile)."""
+    if os.path.exists(SELECTED_PROFILE_FILE):
+        with open(SELECTED_PROFILE_FILE) as f:
+            current = f.read().strip()
+            if current and current != requested_profile:
+                return False, current
+    return True, None
+
 # Stop current profile helper
 def stop_current_profile():
     current_profile = None
@@ -97,13 +107,17 @@ def profile_page(profile_key):
 
         action = request.form.get("action")
         if action == "run":
-            subprocess.Popen([
-                "/home/pi/.virtualenvs/pimoroni/bin/python3", script_path
-            ])
-            with open(SELECTED_PROFILE_FILE, "w") as f:
-                f.write(profile_key)
-            running = True
-            message = f"{name} started."
+            can_start, current = can_start_new_profile(profile_key)
+            if not can_start:
+                message = f"Cannot start {name}. '{current}' is currently running."
+            else:
+                subprocess.Popen([
+                    "/home/pi/.virtualenvs/pimoroni/bin/python3", script_path
+                ])
+                with open(SELECTED_PROFILE_FILE, "w") as f:
+                    f.write(profile_key)
+                running = True
+                message = f"{name} started."
         elif action == "stop":
             subprocess.Popen(["pkill", "-f", script_path])
             open(SELECTED_PROFILE_FILE, "w").close()
@@ -228,15 +242,19 @@ def profile_renderfarm():
 
     if request.method == "POST":
         if request.form.get("action") == "run":
-            subprocess.Popen([
-                "/home/pi/.virtualenvs/pimoroni/bin/python3",
-                monitor_path
-            ])
-            with open(SELECTED_PROFILE_FILE, "w") as f:
-                f.write("renderfarm")
-            running = True
-            message = f"{name} started."
-            return redirect("/profile/renderfarm")
+            can_start, current = can_start_new_profile("renderfarm")
+            if not can_start:
+                message = f"Cannot start {name}. '{current}' is currently running."
+            else:
+                subprocess.Popen([
+                    "/home/pi/.virtualenvs/pimoroni/bin/python3",
+                    monitor_path
+                ])
+                with open(SELECTED_PROFILE_FILE, "w") as f:
+                    f.write("renderfarm")
+                running = True
+                message = f"{name} started."
+                return redirect("/profile/renderfarm")
 
         elif request.form.get("action") == "stop":
             subprocess.Popen(["pkill", "-f", monitor_script])
