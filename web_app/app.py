@@ -33,7 +33,7 @@ PROFILES = {
     },
     "renderfarm": {
         "name": "Renderfarm Monitor",
-        "icon": "🧮",
+        "icon": "🎞️",
         "script": "display_renderfarm_monitor.py",
         "simulate": "simulate_render_jobs.py"
     },
@@ -166,7 +166,8 @@ def profile_stats():
         running=running,
         message=message,
         current_profile=current_profile,
-        current_profile_name=current_profile_name
+        current_profile_name=current_profile_name,
+        profiles=PROFILES
     )
 
 # Route: Image Profile
