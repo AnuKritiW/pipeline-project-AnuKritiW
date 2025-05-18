@@ -1,3 +1,16 @@
+"""
+display_stats.py
+
+Displays system statistics (CPU, RAM, and Disk usage) on an Inky Impression
+e-ink display using a horizontal progress bar layout.
+
+Stats are read from a JSON file (`pcstats.json`) that should be updated
+externally. The screen is refreshed every 2 minutes unless `run_once=True`.
+
+This script is intended to be triggered by the "System Stats" profile
+in the PiPipeline web app.
+"""
+
 from PIL import Image, ImageDraw, ImageFont
 import datetime
 import json
@@ -36,6 +49,13 @@ bar_bg       = (255, 255, 255)   # White background for bars
 bg_color     = (0, 0, 0)         # Black canvas background
 
 def get_pc_stats():
+    """
+    Read system stats from JSON file.
+
+    Returns:
+        dict: A dictionary containing keys like "CPU Usage", "RAM Usage", "Disk Usage".
+              If the file is missing or invalid, returns N/A placeholders.
+    """
     try:
         with open("/home/pi/pipeline-project-AnuKritiW/out/pcstats.json", "r") as f:
             return json.load(f)
@@ -43,12 +63,33 @@ def get_pc_stats():
         return {"CPU Usage": "N/A", "RAM Usage": "N/A", "Disk Usage": "N/A"}
 
 def draw_bar(draw, x, y, percent, width, height=font_sz_value, fill=(255,0,0), bg=bg_color):
-    """Draws a horizontal bar with the given percentage (0–100)"""
+    """
+    Draw a horizontal progress bar representing a percentage.
+
+    Args:
+        draw (ImageDraw.Draw): The drawing context.
+        x (int): X-coordinate of the bar.
+        y (int): Y-coordinate of the bar.
+        percent (float): Percentage to fill (0–100).
+        width (int): Total width of the bar.
+        height (int): Height of the bar.
+        fill (tuple): RGB color for the filled section.
+        bg (tuple): RGB color for the background.
+    """
     draw.rectangle([x, y, x + width, y + height], outline=bg, fill=bg)
     filled = int((percent / 100) * width)
     draw.rectangle([x, y, x + filled, y + height], fill=fill)
 
 def display_stats(run_once=False):
+    """
+    Display system statistics on the Inky Impression display.
+
+    Reads stats from the pcstats.json file, renders them as text and bars,
+    and refreshes the display. If `run_once` is True, displays once and exits.
+
+    Args:
+        run_once (bool): If True, update display only once. Default is False.
+    """
     while True:
         if inky_display:
             img = Image.new("RGB", (inky_display.WIDTH, inky_display.HEIGHT))  # Use palette mode e ink display

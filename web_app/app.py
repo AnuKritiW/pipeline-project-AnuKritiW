@@ -42,14 +42,24 @@ PROFILES = {
 # ==================== HELPERS ====================
 
 def get_current_profile():
+    """
+    Return the currently selected profile key.
+
+    Reads the selected_profile.txt file to determine which profile
+    is currently active. Returns an empty string if no profile is selected.
+    """
     if os.path.exists(SELECTED_PROFILE_FILE):
         with open(SELECTED_PROFILE_FILE) as f:
             return f.read().strip()
     return ""
 
 def can_start_new_profile(requested_profile):
-    """Check if the requested profile can start, and return (True, None) if yes.
-       Otherwise, return (False, current_running_profile)."""
+    """
+    Check if the requested profile can be started.
+
+    Prevents starting a new profile if another one is already running.
+    Returns a tuple (can_start: bool, message: Optional[str]).
+    """
     current = get_current_profile()
     if current and current != requested_profile:
         requested_name = PROFILES.get(requested_profile, {}).get("name", requested_profile)
@@ -58,13 +68,29 @@ def can_start_new_profile(requested_profile):
     return True, None
 
 def kill_script(script_name):
+    """
+    Kill any running process matching the script name.
+
+    Uses `pkill -f` to terminate all processes that match the provided script name.
+    """
     subprocess.Popen(["pkill", "-f", script_name])
 
 def clear_image_state():
+    """
+    Clear the currently displayed image state.
+
+    Executes the clear_image_info.py script to reset the image-related state.
+    """
     clear_script = os.path.join(SCRIPT_DIR, CLEAR_IMAGE_SCRIPT)
     subprocess.run(['python3', clear_script])
 
 def launch_script(profile_key):
+    """
+    Launch the script associated with a given profile.
+
+    Clears image state if the profile isn't 'image',
+    then writes the selected profile key to file.
+    """
     script = os.path.join(SCRIPT_DIR, PROFILES[profile_key]["script"])
     if profile_key != "image":
         clear_image_state()
@@ -73,6 +99,12 @@ def launch_script(profile_key):
         f.write(profile_key)
 
 def stop_current_profile():
+    """
+    Stop the currently running profile, if any.
+
+    Kills associated scripts and clears the selected profile file.
+    Returns the profile that was stopped.
+    """
     current_profile = get_current_profile()
 
     if current_profile and current_profile in PROFILES:
@@ -86,6 +118,12 @@ def stop_current_profile():
 
 # clear files when script is interrupted
 def clear_session_files():
+    """
+    Clear all temporary session files.
+
+    Empties selected_profile.txt, current_image.txt,
+    and resets the renderfarm_filter.json file.
+    """
     try:
         open(SELECTED_PROFILE_FILE, "w").close()
     except Exception as e:
@@ -109,6 +147,12 @@ def clear_session_files():
 # renders the home page using index.html
 @app.route("/", methods=["GET", "POST"])
 def index():
+    """
+    Render the home page.
+
+    Handles the global "Stop" action via POST and renders the index template
+    with the list of profiles and current profile state.
+    """
     current_profile = get_current_profile()
     current_profile_name = PROFILES.get(current_profile, {}).get("name", current_profile)
 
@@ -131,6 +175,12 @@ def index():
 # lastly, display-generic.html is rendered
 @app.route("/profile/stats", methods=["GET", "POST"])
 def profile_stats():
+    """
+    Handle the System Stats profile route.
+
+    Starts/stops the stats display script on POST, and renders
+    a generic display template with status and controls.
+    """
     profile_key = "stats"
     name = PROFILES[profile_key]["name"]
     current_profile = get_current_profile()
@@ -178,6 +228,12 @@ def profile_stats():
 # lastly, renders display_image.html
 @app.route("/profile/image", methods=["GET", "POST"])
 def profile_image():
+    """
+    Handle the Image Display profile route.
+
+    On GET, lists uploaded images and displays the current image.
+    On POST, supports uploading, displaying, and deleting images.
+    """
     message = ""
     current_image = ""
 
@@ -262,6 +318,12 @@ def profile_image():
 # Route: Renderfarm profile
 @app.route("/profile/renderfarm", methods=["GET", "POST"])
 def profile_renderfarm():
+    """
+    Handle the Renderfarm Monitor profile route.
+
+    Manages script launching, stopping, and dynamic filtering
+    of jobs. Supports POST requests to update job filters.
+    """
     profile_key = "renderfarm"
     name = PROFILES[profile_key]["name"]
     message = ""
@@ -365,6 +427,12 @@ def profile_renderfarm():
 # ==================== MAIN ====================
 
 if __name__ == "__main__":
+    """
+    Entry point for running the Flask app.
+
+    Starts the splash screen script and runs the web server.
+    On shutdown, clears session-related files.
+    """
     try:
         subprocess.Popen([
             VENV_PYTHON,

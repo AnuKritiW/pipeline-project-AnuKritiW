@@ -1,8 +1,31 @@
+"""
+display_image.py
+
+Displays an image on the Inky Impression e-ink display.
+
+The script takes an image file path as input, resizes it to match the
+resolution of the Inky display, and renders it using the appropriate
+driver with configurable saturation.
+
+Usage:
+    python display_image.py <image-path>
+"""
+
 import sys
 from PIL import Image
 from inky.inky_uc8159 import Inky  # explicitly use the Impression display
 
 def display_image(image_path, saturation=0.5):
+    """
+    Display an image on the Inky Impression display.
+
+    The image is resized to the native resolution of the display and
+    rendered with the specified color saturation.
+
+    Args:
+        image_path (str): Path to the image file to display.
+        saturation (float): Saturation level for the display (default: 0.5).
+    """
     inky = Inky()
 
     # Load image

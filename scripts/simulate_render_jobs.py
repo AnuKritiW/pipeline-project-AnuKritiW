@@ -1,3 +1,13 @@
+"""
+simulate_render_jobs.py
+
+Simulates a render farm job queue and updates a JSON file with dummy job entries.
+This is used for testing the render farm monitoring UI without needing a real backend.
+
+The script creates, updates, and removes jobs based on probabilistic logic to mimic
+real-world render queue dynamics. It is designed to be run continuously in the background.
+"""
+
 import json
 import os
 import time
@@ -18,6 +28,13 @@ STATUS = ["waiting", "rendering"]
 next_id = 1001
 
 def generate_job():
+    """
+    Generate a new fake render job with randomized attributes.
+
+    Returns:
+        dict: A new job entry with fields like user, project, shot, tool,
+              frame range, progress (0), and status ('waiting' or 'rendering').
+    """
     global next_id
     job = {
         "job_id": next_id,
@@ -33,6 +50,20 @@ def generate_job():
     return job
 
 def simulate_render_jobs(run_once=False):
+    """
+    Simulate a render farm by managing a list of active jobs and saving to JSON.
+
+    Jobs can:
+      - Transition from 'waiting' → 'rendering'
+      - Progress from 0 to 100% while rendering
+      - Randomly fail
+      - Randomly be removed after completion/failure
+
+    A new job is added periodically to maintain activity.
+
+    Args:
+        run_once (bool): If True, only run the simulation once; otherwise loop forever.
+    """
     while True:
         if not os.path.exists(status_file):
             jobs = []

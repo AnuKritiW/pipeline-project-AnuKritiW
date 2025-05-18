@@ -1,3 +1,17 @@
+"""
+display_renderfarm_monitor.py
+
+Displays the status of render jobs on an Inky Impression e-ink display.
+It reads job and filter data from JSON files, formats them into a visual table,
+and periodically refreshes the screen.
+
+It also supports a `run_once` mode, which renders the display only once—
+useful for testing or manual refreshes.
+
+This script is intended to be run continuously in the background by the web app,
+specifically when the "Renderfarm Monitor" profile is active.
+"""
+
 from inky.auto import auto
 from PIL import Image, ImageDraw, ImageFont
 import os
@@ -6,6 +20,16 @@ import time
 import subprocess
 
 def display_render_farm(run_once=False):
+    """
+    Render the current status of the render farm on the Inky Impression display.
+
+    Loads job data and filter criteria from JSON files, applies filters, and displays
+    a formatted summary including user, project, tool, frame count, status, and progress.
+
+    Args:
+        run_once (bool): If True, renders the display once and exits.
+                         If False (default), continues refreshing every 2 minutes.
+    """
     # setup display
     inky_display = auto()
     inky_display.set_border(inky_display.WHITE)
@@ -153,6 +177,12 @@ def display_render_farm(run_once=False):
         time.sleep(120) # refresh every 2 min
 
 def simulate_render_jobs():
+    """
+    Launch the render job simulator script in the background.
+
+    This is useful for testing or demonstration. The simulator
+    generates mock job data to populate the display.
+    """
     script_dir = os.path.dirname(os.path.abspath(__file__))
     sim_script_path = os.path.join(script_dir, "simulate_render_jobs.py")
     subprocess.Popen(["python3", sim_script_path])

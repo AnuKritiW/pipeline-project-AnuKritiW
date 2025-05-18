@@ -1,9 +1,26 @@
+"""
+splash_screen.py
+
+Displays a branded startup splash message on the Inky Impression e-ink display
+when the PiPipeline system boots up. The splash includes the system name and
+a URL prompt to access the web interface.
+
+Also clears the current image tracking file (`current_image.txt`) to reset state.
+"""
+
 from inky.auto import auto
 from PIL import Image, ImageFont, ImageDraw
 import os
 import subprocess
 
 def show_pipeline_splash():
+    """
+    Display the PiPipeline splash screen on the Inky Impression display.
+
+    Shows a centered logo/title ("PiPeline") and a message directing the user
+    to the local web server (http://pi.local:5000). After displaying the splash,
+    it clears `current_image.txt` by calling `clear_image_info.py`.
+    """
     inky_display = auto()
     inky_display.set_border(inky_display.WHITE)
 
