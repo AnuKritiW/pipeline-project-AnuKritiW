@@ -10,7 +10,7 @@ while true; do
         echo "[ERROR] No stats received!"
     else
         echo "Captured stats: $STATS"
-        echo "$STATS" | ssh pi@pi-two.local "mkdir -p ~/pipeline-project-AnuKritiW/out &&
+        echo "$STATS" | ssh pi@pi.local "mkdir -p ~/pipeline-project-AnuKritiW/out &&
                             cat > ~/pipeline-project-AnuKritiW/out/pcstats.json"
     fi
 
