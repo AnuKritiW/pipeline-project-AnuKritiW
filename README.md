@@ -1,20 +1,12 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/Tn7g_Mhz)
 
-#### TODOs (as of 1/5):
-- [ ] Testing/Github Actions to incorporate install scripts (?)
-- [x] Fix bug on image profile page -- profile page no longer redirecting correctly to a successful state though image loads on the pi
-- [ ] Record Demo
-- [x] Include updated screenshots + images of pi
-- [ ] Rename files (e.g. stats-test)
-- [ ] Make file paths relative
-- [ ] Clean up repository structure
-<br><br>
-
 # PiPeline - a companion e-ink display to assist artists
 
 `PiPeline` is a lightweight, always-on companion display designed to support artists and technical directors during production workflows. It provides real-time system statistics to help quickly identify compute-heavy bottlenecks, alongside a customizable reference image display. By offering critical information and visual guidance at a glance, `PiPeline` enhances studio efficiency without disrupting the artist's main workspace.
 
 The system is designed with flexibility in mind, allowing new profiles — such as render farm monitors or task-specific dashboards — to be easily added by pipeline engineers as production needs evolve.
+
+**Demo found [here](https://youtu.be/Pn5R1bDJlVw)**
 
 > ## Table of Contents:
 > - [Features](#features)
@@ -23,7 +15,7 @@ The system is designed with flexibility in mind, allowing new profiles — such 
 > - [Installation](#installation)
 > - [Usage](#usage)
 > - [Testing](#testing)
-> - [Demo Images](#demo-images)
+> - [Demo](#demo)
 > - [UML Diagrams](#uml-diagrams)
 > - [Branching and PRs](#branching-and-prs)
 > - [References](#references)
@@ -34,6 +26,8 @@ The system is designed with flexibility in mind, allowing new profiles — such 
     * Displays live CPU, GPU, and memory usage from your developer machine, helping artists and TDs detect compute bottlenecks during rendering or heavy tasks.
 * Reference Image Viewer
   *  Supports loading a reference image on the E-Ink display, useful for visual consistency or on-screen comparison while working.
+*  Render Farm Monitor
+   *  Displays real-time job status filtered by artist, tool, or render status (e.g. running, failed). Designed to offload render queue visibility to a dedicated display, keeping the main workstation uncluttered during production.
 *  Modular Profile System (Extensible)
    *  Designed with flexibility to support additional profiles — such as render farm status, task dashboards, or system alerts — with minimal configuration changes.
 * Automated Setup Scripts
@@ -121,12 +115,6 @@ cat ~/.ssh/id_ed25519.pub
 
 ## Installation
 
-<!-- 1. Enable SPI and I2C under "Interface Options" with the command:
-```
-sudo raspi-config
-``` -->
-<!-- TODO: The steps below use installation scripts. If you prefer setting things up manually, see [Manual Setup Instructions](./assets/docs/manual-setup.md). -->
-
 ### On Developer Machine
 
 1. On your Mac, clone the project and run the install script
@@ -169,7 +157,9 @@ This script is a continuously running script that will send CPU usage, GPU usage
 ### On the Pi
 
 1. On Safari, visit `http://pi.local:5000`
-TODO: (On other browsers, some settings need to be changed to access)
+
+> Note:
+> Accessing the Pi-hosted web app on non-Safari browsers may require adjusting local network or security settings (e.g., allowing HTTP over .local domains).
 
 2. Choose the profile you would like to load up on the pi
 
@@ -195,27 +185,54 @@ pytest tests/
 ```
 cd pipeline-project-AnuKritiW
 source ~/.virtualenvs/pimoroni/bin/activate
-pytest --cov=web_app --cov=scripts --cov-report=term-missing tests/
+pytest --cov=web_app --cov=scripts tests/
+```
+
+Below is the result of running the coverage command directly on the Pi:
+```
+======================================================================================= tests coverage ========================================================================================
+_______________________________________________________________________ coverage: platform linux, python 3.11.2-final-0 _______________________________________________________________________
+
+Name                                    Stmts   Miss  Cover
+-----------------------------------------------------------
+scripts/clear_image_info.py                11      0   100%
+scripts/display_image.py                   15      5    67%
+scripts/display_renderfarm_monitor.py     111     15    86%
+scripts/display_stats.py                   84     17    80%
+scripts/pcstats.py                          7      0   100%
+scripts/simulate_render_jobs.py            52      9    83%
+scripts/splash_screen.py                   34      4    88%
+web_app/app.py                            215     16    93%
+-----------------------------------------------------------
+TOTAL                                     529     66    88%
+===================================================================================== 36 passed in 14.29s =====================================================================================
 ```
 
 ### Continuous Integration with GitHub Actions
 All unit tests located in the tests/ directory are run automatically on each push and pull request.
-<!-- TODO: CI workflow ensures that installation scripts and project dependencies remain valid across updates -->
 The workflow file is located at:
 ```
 .github/workflows/tests.yml
 ```
+> **Note:**
+> Tests that rely on the physical Inky E-Ink display or hardware-specific SPI interactions have been excluded from the CI pipeline.
+> These tests require a connected display and low-level GPIO/SPI access, which are not available in GitHub's cloud runners.
+> They can still be executed locally on a Raspberry Pi for full integration testing.
 
-## Demo Images
+## Demo
 
-| Feature Description                                                                            | Demo Image                                                                              |
-| ---------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Wrote a Flask web application. It has two profiles -- stats and images.                        | ![webApp-progress-1](./assets/demo_images/webApp-HomePage.png)                          |
-| When the web app is first run, the eink display automatically shows a splash screen.           | ![einkDisplay-splashscreen](./assets/demo_images/einkDisplay-splashscreen.jpeg)         |
-| Stats profile view in web app.                                                                 | ![webApp-statsprofilecard](./assets/demo_images/webApp-StatsProfile.png)                |
-| Retrieves System stats (CPU, RAM and Disk) from a Mac and updates the display every 2 minutes. | ![einkDisplay-progress-2](./assets/demo_images/einkDisplay-progress-2.jpeg)             |
-| Image Display profile view in web app.                                                         | ![webApp-imageprofilecard](./assets/demo_images/webApp-ImageProfile.png)                |
-| Displays a chosen reference image.                                                             | ![einkDisplay-image-progress-1](./assets/demo_images/einkDisplay-image-progress-1.jpeg) |
+### Demo video found [here](https://youtu.be/Pn5R1bDJlVw)
+
+| Feature Description                                                                            | Demo Image                                                                         |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Wrote a Flask web application. It has two profiles -- stats and images.                        | ![webApp-progress-1](./assets/demo_images/webApp-HomePage.png)                     |
+| When the web app is first run, the eink display automatically shows a splash screen.           | ![einkDisplay-splashscreen](./assets/demo_images/einkDisplay-splashscreen.jpg)     |
+| Image Display profile view in web app.                                                         | ![webApp-imageprofilecard](./assets/demo_images/webApp-ImageProfile.png)           |
+| Displays a chosen reference image.                                                             | ![einkDisplay-image](./assets/demo_images/einkDisplay-image.jpg)        |
+| Renderfarm Monitor profile view in web app.                                                    | ![webApp-renderfarmprofilecard](./assets/demo_images/webApp-RenderfarmProfile.png) |
+| Retrieves Job information and updates the display every 2 minutes.                             | ![einkDisplay-renderfarm-monitor](./assets/demo_images/einkDisplay-renderfarm.jpg)        |
+| Stats profile view in web app.                                                                 | ![webApp-statsprofilecard](./assets/demo_images/webApp-StatsProfile.png)           |
+| Retrieves System stats (CPU, RAM and Disk) from a Mac and updates the display every 2 minutes. | ![einkDisplay-progress-2](./assets/demo_images/einkDisplay-stats.jpg)              |
 
 ## UML Diagrams
 
