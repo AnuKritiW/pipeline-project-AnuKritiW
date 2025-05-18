@@ -301,7 +301,8 @@ def test_stop_current_profile(mock_exists, mock_open_file, mock_popen):
 
 def test_stop_current_profile_file_missing():
     with patch("web_app.app.os.path.exists", return_value=False), \
-         patch("web_app.app.subprocess.Popen") as mock_popen:
+         patch("web_app.app.subprocess.Popen") as mock_popen, \
+	 patch("web_app.app.open", mock_open()):
         stopped_profile = stop_current_profile()
         assert stopped_profile is ""
         mock_popen.assert_not_called()
