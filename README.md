@@ -225,12 +225,12 @@ The workflow file is located at:
 
 | Feature Description                                                                            | Demo Image                                                                         |
 | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Wrote a Flask web application. It has two profiles -- stats and images.                        | ![webApp-progress-1](./assets/demo_images/webApp-HomePage.png)                     |
+| Wrote a Flask web application. It has three profiles -- stats, images and renderfarm monitor   | ![webApp-progress-1](./assets/demo_images/webApp-HomePage.png)                     |
 | When the web app is first run, the eink display automatically shows a splash screen.           | ![einkDisplay-splashscreen](./assets/demo_images/einkDisplay-splashscreen.jpg)     |
 | Image Display profile view in web app.                                                         | ![webApp-imageprofilecard](./assets/demo_images/webApp-ImageProfile.png)           |
-| Displays a chosen reference image.                                                             | ![einkDisplay-image](./assets/demo_images/einkDisplay-image.jpg)        |
+| Displays a chosen reference image.                                                             | ![einkDisplay-image](./assets/demo_images/einkDisplay-image.jpg)                   |
 | Renderfarm Monitor profile view in web app.                                                    | ![webApp-renderfarmprofilecard](./assets/demo_images/webApp-RenderfarmProfile.png) |
-| Retrieves Job information and updates the display every 2 minutes.                             | ![einkDisplay-renderfarm-monitor](./assets/demo_images/einkDisplay-renderfarm.jpg)        |
+| Retrieves Job information and updates the display every 2 minutes.                             | ![einkDisplay-renderfarm-monitor](./assets/demo_images/einkDisplay-renderfarm.jpg) |
 | Stats profile view in web app.                                                                 | ![webApp-statsprofilecard](./assets/demo_images/webApp-StatsProfile.png)           |
 | Retrieves System stats (CPU, RAM and Disk) from a Mac and updates the display every 2 minutes. | ![einkDisplay-progress-2](./assets/demo_images/einkDisplay-stats.jpg)              |
 
