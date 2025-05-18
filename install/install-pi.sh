@@ -6,6 +6,10 @@ echo "📦 Updating system..."
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y expect
 
+echo "🔧 Enabling SPI and I2C interfaces..."
+sudo raspi-config nonint do_spi 0
+sudo raspi-config nonint do_i2c 0
+
 cd ~
 echo "📁 Now in $(pwd)"
 if [ ! -d ~/inky ]; then
