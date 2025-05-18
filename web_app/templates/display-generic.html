@@ -2,11 +2,7 @@
 
 {% block content %}
   <a href="/" style="text-decoration:none;font-size:0.9rem">&larr; Back to Dashboard</a>
-  <h1>{{ profile_name }}</h1>
-
-  {% if message %}
-    <p><em>{{ message }}</em></p>
-  {% endif %}
+  <h1>{{ profiles[profile_key].icon }} {{ profile_name }}</h1>
 
   <form method="POST">
     {% if running %}
@@ -15,5 +11,10 @@
       <button type="submit" name="action" value="run" class="btn btn-green">▶ Run Display</button>
     {% endif %}
   </form>
+
+  {% if message %}
+    <p><em>{{ message }}</em></p>
+  {% endif %}
+
 {% endblock %}
 

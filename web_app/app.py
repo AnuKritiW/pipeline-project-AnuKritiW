@@ -4,6 +4,7 @@ import os
 import json
 import time
 
+# ==================== CONFIGURATION ====================
 app = Flask(__name__, static_url_path='/static')
 
 # Base paths
@@ -13,6 +14,10 @@ DATA_DIR = os.path.join(BASE_DIR, 'data')
 STATIC_UPLOADS = os.path.join(BASE_DIR, 'static', 'uploads')
 SELECTED_PROFILE_FILE = os.path.join(BASE_DIR, 'selected_profile.txt')
 CURRENT_IMAGE_FILE = os.path.join(BASE_DIR, 'current_image.txt')
+
+VENV_PYTHON = "/home/pi/.virtualenvs/pimoroni/bin/python3"
+SPLASH_SCRIPT = "splash_screen.py"
+CLEAR_IMAGE_SCRIPT = "clear_image_info.py"
 
 # Script filenames
 PROFILES = {
@@ -28,67 +33,109 @@ PROFILES = {
     },
     "renderfarm": {
         "name": "Renderfarm Monitor",
-        "icon": "🧮",
+        "icon": "🎞️",
         "script": "display_renderfarm_monitor.py",
         "simulate": "simulate_render_jobs.py"
     },
 }
 
-# Stop current profile helper
-def stop_current_profile():
-    current_profile = None
+# ==================== HELPERS ====================
 
+def get_current_profile():
     if os.path.exists(SELECTED_PROFILE_FILE):
         with open(SELECTED_PROFILE_FILE) as f:
-            current_profile = f.read().strip()
+            return f.read().strip()
+    return ""
+
+def can_start_new_profile(requested_profile):
+    """Check if the requested profile can start, and return (True, None) if yes.
+       Otherwise, return (False, current_running_profile)."""
+    current = get_current_profile()
+    if current and current != requested_profile:
+        requested_name = PROFILES.get(requested_profile, {}).get("name", requested_profile)
+        current_name = PROFILES.get(current, {}).get("name", current)
+        return False, f"Cannot start {requested_name}. '{current_name}' is currently running."
+    return True, None
+
+def kill_script(script_name):
+    subprocess.Popen(["pkill", "-f", script_name])
+
+def clear_image_state():
+    clear_script = os.path.join(SCRIPT_DIR, CLEAR_IMAGE_SCRIPT)
+    subprocess.run(['python3', clear_script])
+
+def launch_script(profile_key):
+    script = os.path.join(SCRIPT_DIR, PROFILES[profile_key]["script"])
+    if profile_key != "image":
+        clear_image_state()
+    subprocess.Popen([VENV_PYTHON, script])
+    with open(SELECTED_PROFILE_FILE, "w") as f:
+        f.write(profile_key)
+
+def stop_current_profile():
+    current_profile = get_current_profile()
 
     if current_profile and current_profile in PROFILES:
-        script_name = PROFILES[current_profile]["script"]
-        subprocess.Popen(["pkill", "-f", script_name])
+        kill_script(PROFILES[current_profile]["script"])
 
         if current_profile == "renderfarm":
-            subprocess.Popen(["pkill", "-f", PROFILES["renderfarm"]["simulate"]])
+            kill_script(PROFILES["renderfarm"]["simulate"])
 
-        open(SELECTED_PROFILE_FILE, "w").close()
-
+    open(SELECTED_PROFILE_FILE, "w").close()
     return current_profile
+
+# clear files when script is interrupted
+def clear_session_files():
+    try:
+        open(SELECTED_PROFILE_FILE, "w").close()
+    except Exception as e:
+        print(f"Error clearing selected_profile.txt: {e}")
+    try:
+        open(CURRENT_IMAGE_FILE, "w").close()
+    except Exception as e:
+        print(f"Error clearing current_image.txt: {e}")
+    try:
+        filter_path = os.path.join(DATA_DIR, "renderfarm_filter.json")
+        with open(filter_path, "w") as f:
+            json.dump({"user": "", "project": "", "status": "", "tool": ""}, f, indent=2)
+    except Exception as e:
+        print(f"Error resetting renderfarm_filter.json: {e}")
+
+    print("Session files cleared.")
+
+# ==================== ROUTES ====================
 
 # Route: Home
 # renders the home page using index.html
 @app.route("/", methods=["GET", "POST"])
 def index():
-    current_profile = ""
-    if os.path.exists(SELECTED_PROFILE_FILE):
-        with open(SELECTED_PROFILE_FILE) as f:
-            current_profile = f.read().strip()
+    current_profile = get_current_profile()
+    current_profile_name = PROFILES.get(current_profile, {}).get("name", current_profile)
 
     if request.method == "POST" and request.form.get("stop_global"):
         stop_current_profile()
         return redirect(request.path)
 
-    return render_template("index.html", profiles=PROFILES, current_profile=current_profile)
+    return render_template(
+        "index.html",
+        profiles=PROFILES,
+        current_profile=current_profile,
+        current_profile_name=current_profile_name
+    )
 
-# Route: Generic Profile
+# Route: Stats
 # creates a generic profile page if no special profile has been created for it
 # GET checks if the profile exists, then redirects to the right profile
 # a file 'selected_profile.txt' is created that describes what profile is currently running, if any
 # POST handles the buttons ('Run'/'Stop')
 # lastly, display-generic.html is rendered
-@app.route("/profile/<profile_key>", methods=["GET", "POST"])
-def profile_page(profile_key):
-    if profile_key not in PROFILES:
-        return "Invalid profile", 404
-
-    script_path = os.path.join(SCRIPT_DIR, PROFILES[profile_key]["script"])
+@app.route("/profile/stats", methods=["GET", "POST"])
+def profile_stats():
+    profile_key = "stats"
     name = PROFILES[profile_key]["name"]
+    current_profile = get_current_profile()
     message = ""
-    running = False
-
-    current_profile = ""
-    if os.path.exists(SELECTED_PROFILE_FILE):
-        with open(SELECTED_PROFILE_FILE) as f:
-            current_profile = f.read().strip()
-            running = (current_profile == profile_key)
+    running = (current_profile == profile_key)
 
     if request.method == "POST":
         if request.form.get("stop_global"):
@@ -97,19 +144,20 @@ def profile_page(profile_key):
 
         action = request.form.get("action")
         if action == "run":
-            subprocess.Popen([
-                "/home/pi/.virtualenvs/pimoroni/bin/python3", script_path
-            ])
-            with open(SELECTED_PROFILE_FILE, "w") as f:
-                f.write(profile_key)
-            running = True
-            message = f"{name} started."
+            can_start, message = can_start_new_profile(profile_key)
+            if can_start:
+                launch_script(profile_key)
+                running = True
+                message = f"{name} started."
+                return redirect(f"/profile/{profile_key}")
         elif action == "stop":
-            subprocess.Popen(["pkill", "-f", script_path])
+            kill_script(PROFILES[profile_key]["script"])
             open(SELECTED_PROFILE_FILE, "w").close()
             running = False
             message = f"{name} stopped."
-        return redirect(f"/profile/{profile_key}")
+            return redirect(f"/profile/{profile_key}")
+
+    current_profile_name = PROFILES.get(current_profile, {}).get("name", current_profile)
 
     return render_template(
         "display-generic.html",
@@ -117,7 +165,9 @@ def profile_page(profile_key):
         profile_key=profile_key,
         running=running,
         message=message,
-        current_profile=current_profile
+        current_profile=current_profile,
+        current_profile_name=current_profile_name,
+        profiles=PROFILES
     )
 
 # Route: Image Profile
@@ -155,21 +205,23 @@ def profile_image():
 
         # Display selected image
         elif action == "display":
-            filename = request.form.get("selected_image")
-            image_path = os.path.join(STATIC_UPLOADS, filename)
+            can_start, message = can_start_new_profile("image")
+            if can_start:
+                filename = request.form.get("selected_image")
+                image_path = os.path.join(STATIC_UPLOADS, filename)
 
-            try:
-                subprocess.run([
-                    "/home/pi/.virtualenvs/pimoroni/bin/python3",
-                    os.path.join(SCRIPT_DIR, PROFILES["image"]["script"]),
-                    image_path
-                ], check=True)  # check=True will raise CalledProcessError if fails
-                with open(CURRENT_IMAGE_FILE, "w") as f:
-                    f.write(filename)
-                current_image = filename
-                message = f"Now displaying {filename}"
-            except subprocess.CalledProcessError as e:
-                message = "Failed to display image. The display might be busy or another script is running."
+                try:
+                    subprocess.run([
+                        VENV_PYTHON,
+                        os.path.join(SCRIPT_DIR, PROFILES["image"]["script"]),
+                        image_path
+                    ], check=True)  # check=True will raise CalledProcessError if fails
+                    with open(CURRENT_IMAGE_FILE, "w") as f:
+                        f.write(filename)
+                    current_image = filename
+                    message = f"Now displaying {filename}"
+                except subprocess.CalledProcessError as e:
+                    message = "Failed to display image. The display might be busy or another script is running."
 
         # Delete selected image
         elif action == "delete":
@@ -189,59 +241,49 @@ def profile_image():
 
     # List available images
     images = os.listdir(STATIC_UPLOADS)
-
-    current_profile = ""
-    if os.path.exists(SELECTED_PROFILE_FILE):
-        with open(SELECTED_PROFILE_FILE) as f:
-            current_profile = f.read().strip()
+    current_profile = get_current_profile()
 
     # Global stop handler (from status card)
     if request.method == "POST" and request.form.get("stop_global"):
         stop_current_profile()
         return redirect(request.path)
 
+    current_profile_name = PROFILES.get(current_profile, {}).get("name", current_profile)
+
     return render_template(
         "display_image.html",
         images=images,
         current_image=current_image,
         message=message,
-        current_profile=current_profile
+        current_profile=current_profile,
+        current_profile_name=current_profile_name
     )
 
 # Route: Renderfarm profile
 @app.route("/profile/renderfarm", methods=["GET", "POST"])
 def profile_renderfarm():
-    name = PROFILES["renderfarm"]["name"]
+    profile_key = "renderfarm"
+    name = PROFILES[profile_key]["name"]
     message = ""
-    running = False
-    monitor_script = PROFILES["renderfarm"]["script"]
-    sim_script = PROFILES["renderfarm"]["simulate"]
+    current_profile = get_current_profile()
+    running = (current_profile == profile_key)
+    monitor_script = PROFILES[profile_key]["script"]
+    sim_script = PROFILES[profile_key]["simulate"]
     monitor_path = os.path.join(SCRIPT_DIR, monitor_script)
-    # data_dir = os.path.join(app.root_path, "data")
-
-    # Load current profile
-    current_profile = ""
-    if os.path.exists(SELECTED_PROFILE_FILE):
-        with open(SELECTED_PROFILE_FILE) as f:
-            current_profile = f.read().strip()
-            running = (current_profile == "renderfarm")
 
     if request.method == "POST":
         if request.form.get("action") == "run":
-            subprocess.Popen([
-                "/home/pi/.virtualenvs/pimoroni/bin/python3",
-                monitor_path
-            ])
-            with open(SELECTED_PROFILE_FILE, "w") as f:
-                f.write("renderfarm")
-            running = True
-            message = f"{name} started."
-            return redirect("/profile/renderfarm")
+            can_start, message = can_start_new_profile("renderfarm")
+            if can_start:
+                launch_script(profile_key)
+                running = True
+                message = f"{name} started."
+                return redirect("/profile/renderfarm")
 
         elif request.form.get("action") == "stop":
-            subprocess.Popen(["pkill", "-f", monitor_script])
+            kill_script(monitor_script)
             time.sleep(1)
-            subprocess.Popen(["pkill", "-f", sim_script])
+            kill_script(sim_script)
             open(SELECTED_PROFILE_FILE, "w").close()
             running = False
             message = f"{name} stopped."
@@ -261,10 +303,10 @@ def profile_renderfarm():
 
             if running:
                 # restart the display script so it refreshes immediately
-                subprocess.Popen(["pkill", "-f", monitor_script])
+                kill_script(monitor_script)
                 time.sleep(1)
                 subprocess.Popen([
-                    "/home/pi/.virtualenvs/pimoroni/bin/python3",
+                    VENV_PYTHON,
                     monitor_path
                 ])
 
@@ -291,13 +333,10 @@ def profile_renderfarm():
     # Always define filter_data, from file if not set in POST
     if 'filter_data' not in locals():
         filter_path = os.path.join(DATA_DIR, 'renderfarm_filter.json')
-        if os.path.exists(filter_path):
-            try:
-                with open(filter_path) as f:
-                    filter_data = json.load(f)
-            except json.JSONDecodeError:
-                filter_data = {}
-        else:
+        try:
+            with open(filter_path) as f:
+                filter_data = json.load(f)
+        except json.JSONDecodeError:
             filter_data = {}
 
     current_filter = {
@@ -307,43 +346,29 @@ def profile_renderfarm():
         "status": filter_data.get("status", "")
     }
 
+    current_profile_name = PROFILES.get(current_profile, {}).get("name", current_profile)
+
     return render_template(
         "display-renderfarm.html",
         profile_name=name,
-        profile_key="renderfarm",
+        profile_key=profile_key,
         running=running,
         message=message,
         current_profile=current_profile,
         users=users,
         projects=projects,
         tools=tools,
-        current_filter=current_filter
+        current_filter=current_filter,
+        current_profile_name=current_profile_name
     )
 
-# clear files when script is interrupted
-def clear_session_files():
-    try:
-        open(SELECTED_PROFILE_FILE, "w").close()
-    except Exception as e:
-        print(f"Error clearing selected_profile.txt: {e}")
-    try:
-        open(CURRENT_IMAGE_FILE, "w").close()
-    except Exception as e:
-        print(f"Error clearing current_image.txt: {e}")
-    try:
-        filter_path = os.path.join(DATA_DIR, "renderfarm_filter.json")
-        with open(filter_path, "w") as f:
-            json.dump({"user": "", "project": "", "status": "", "tool": ""}, f, indent=2)
-    except Exception as e:
-        print(f"Error resetting renderfarm_filter.json: {e}")
-
-    print("Session files cleared.")
+# ==================== MAIN ====================
 
 if __name__ == "__main__":
     try:
         subprocess.Popen([
-            "/home/pi/.virtualenvs/pimoroni/bin/python3",
-            os.path.join(SCRIPT_DIR, "splash_screen.py")
+            VENV_PYTHON,
+            os.path.join(SCRIPT_DIR, SPLASH_SCRIPT)
         ])
         app.run(host="0.0.0.0", port=5000)
     finally:
