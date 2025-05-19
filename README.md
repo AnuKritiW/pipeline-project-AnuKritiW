@@ -2,9 +2,9 @@
 
 # PiPeline - a companion e-ink display to assist artists
 
-`PiPeline` is a lightweight, always-on companion display designed to support artists and technical directors during production workflows. It provides real-time system statistics to help quickly identify compute-heavy bottlenecks, alongside a customizable reference image display. By offering critical information and visual guidance at a glance, `PiPeline` enhances studio efficiency without disrupting the artist's main workspace.
+`PiPeline` is a lightweight, always-on companion display designed to support artists and technical directors during production workflows. It provides **real-time system statistics** to help quickly **identify compute-heavy bottlenecks**, alongside a customizable **reference image display**. It also includes a proof of concept **Render Farm Status Monitor**. By offering critical information and visual guidance at a glance, `PiPeline` **enhances studio efficiency without disrupting the artist's main workspace**.
 
-The system is designed with flexibility in mind, allowing new profiles — such as render farm monitors or task-specific dashboards — to be easily added by pipeline engineers as production needs evolve.
+The system is designed with flexibility in mind, allowing new profiles — such as task-specific dashboards or free-text notes — to be easily added by pipeline engineers as production needs evolve.
 
 **Demo found [here](https://youtu.be/Pn5R1bDJlVw)**
 
@@ -18,6 +18,7 @@ The system is designed with flexibility in mind, allowing new profiles — such 
 > - [Demo](#demo)
 > - [UML Diagrams](#uml-diagrams)
 > - [Branching and PRs](#branching-and-prs)
+> - [Summary](#summary)
 > - [References](#references)
 
 ## Features
@@ -257,21 +258,57 @@ Feature branches and bug-fix branches were used consistently to ensure the `main
     * PR history can be found [here](https://github.com/NCCA/pipeline-project-AnuKritiW/pulls?q=is%3Apr+is%3Aclosed)
 * **Commit History**: The commit history consists of small, meaningful commits that clearly document the development process. Since this is an assignment submission, features and bug fixes were not squashed before merging to preserve a transparent record of interactions with the repository.
 
+## Summary
+
+**PiPeline** was designed and implemented to meet the full criteria for distinction, demonstrating strength across development, documentation, testing, and deployment.
+
+* **Test-Driven Development & Design**
+
+    Unit tests were written alongside feature development ([Testing](#testing)) and cover 88% of the codebase, with continuous integration enabled through GitHub Actions. Tests that rely on hardware are clearly separated and runnable on-device.
+
+* **Design of Product / Solution**
+
+    The system is modular and extensible by design ([Features](#features)), supporting multiple display profiles like stats, reference images, and a render farm monitor. The architecture is documented through [UML diagrams](#uml-diagrams), including **component**, **deployment**, and **sequence** diagrams that reflect both structural and behavioral aspects of the system.
+
+* **Development Using Suitable Tools**
+
+    Tools and technologies were chosen for practicality and scalability, including `Python`, `Flask`, and `systemd` for services. The project uses **platform-appropriate packages** (e.g., **Inky libraries**) and **GitHub** workflows to support automated testing and updates.
+
+* **Documentation of Solution Including Installation and Usage**
+
+    Detailed guidance is provided throughout this README for [hardware setup](#required-hardware), [Pi configuration](#setting-up-the-pi), [installation](#installation), and [usage](#usage).
+
+    A [demo video](https://youtu.be/Pn5R1bDJlVw) and [images](#demo) reinforce the expected output, and the project is designed to be developer-friendly.
+
+* **Deployment of Solution**
+
+    Installation scripts for both macOS and Raspberry Pi allow the system to be deployed with minimal user input. Once installed, the display runs automatically via `systemd`, requiring no manual interaction at startup.
+
+Additionally, the project demonstrates **good software engineering practice** through:
+* Consistent use of branches and pull requests ([Branching and PRs](#branching-and-prs))
+* A meaningful commit history
+* Structured and well-documented code (docstrings and modular design)
+
+> In summary, **PiPeline** is a fully working, well-documented, and extensible companion tool that demonstrates mastery in pipeline development, testing, and deployment - aligned with industry best practices and assessment expectations.
+
 ## References
 
 * Ak, F., 2025. *InkyPi*. Github. Available from: https://github.com/fatihak/InkyPi [Accessed 10 February 2025].
 * Ak, F., 2024. *Minimal E-Ink Clock with a Raspberry Pi (Tutorial)* [video]. YouTube. Available from: https://www.youtube.com/watch?v=L5PvQj1vfC4&ab_channel=AKZDev [Accessed 10 February 2025].
 * Pallets, 2024. *Template Designer Documentation*. Available from: https://jinja.palletsprojects.com/en/stable/templates/ [Accessed 21 April 2025].
 * Pimoroni, 2024. *Getting Started with Inky pHAT*. Available from: https://learn.pimoroni.com/article/getting-started-with-inky-phat#displaying-text-on-inky-phat [Accessed 15 March 2025].
+* Pimoroni Ltd, 2025. **inky**. Github. Available from: https://github.com/pimoroni/inky [Accessed 10 February 2025].
 * The Robotics Back-End, 2024. *Raspberry Pi – Create a Flask Server*. Available from: https://roboticsbackend.com/raspberry-pi-create-a-flask-server/ [Accessed 16 April 2025].
 * Ward, R., 2023. *spotipi-eink*. Github. Available from: https://github.com/ryanwa18/spotipi-eink?tab=readme-ov-file [Accessed 10 February 2025].
 * Zhang, D., 2024. *The E-ink Desk Accessory I've Always Wanted.* [video]. YouTube. Available from: https://www.youtube.com/watch?v=d9forDotXkI&ab_channel=DavidZhang [Accessed 10 February 2025].
 
 ChatGPT was used for
-* Generating initial HTML code templates, which were subsequently modified and adapted to project needs.
+* Generating initial HTML code and some Python script templates, which were subsequently modified and adapted to project needs.
 * Brainstorming and refining UI wording.
 * Understanding Flask concepts more quickly, including:
     * Evaluating Flask, FastAPI, and other backend frameworks to select the most suitable option.
     * Getting design recommendations for abstraction (e.g. Jinja template inheritance)
 * Debugging and troubleshooting issues during development.
-* All suggestions provided by ChatGPT were critically reviewed and adapted as necessary to ensure correctness and alignment with the project requirements.
+* Writing consistent and clear docstrings across all Python modules and functions to improve code readability and maintainability.
+* Assistance with drafting and refining the README
+* **All** suggestions provided by ChatGPT were **critically reviewed** and adapted as necessary to ensure correctness and alignment with the project requirements.
