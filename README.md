@@ -2,6 +2,8 @@
 
 # PiPeline - a companion e-ink display to assist artists
 
+![banner](./assets/demo_images/pipeline_banner_4x1.png)
+
 `PiPeline` is a lightweight, always-on companion display designed to support artists and technical directors during production workflows. It provides **real-time system statistics** to help quickly **identify compute-heavy bottlenecks**, alongside a customizable **reference image display**. It also includes a proof of concept **Render Farm Status Monitor**. By offering critical information and visual guidance at a glance, `PiPeline` **enhances studio efficiency without disrupting the artist's main workspace**.
 
 The system is designed with flexibility in mind, allowing new profiles — such as task-specific dashboards or free-text notes — to be easily added by pipeline engineers as production needs evolve.
