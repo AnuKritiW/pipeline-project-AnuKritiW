@@ -32,7 +32,6 @@ def display_image(image_path, saturation=0.5):
     image = Image.open(image_path)
 
     # Resize to display resolution
-    # TODO: add paramter on web app
     image = image.resize((inky.WIDTH, inky.HEIGHT))
 
     # Let Inky handle the conversion + display
