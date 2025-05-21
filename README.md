@@ -65,11 +65,17 @@ Before installing PiPeline, you need to prepare your Raspberry Pi by installing 
     Choose OS: Raspberry Pi OS (64-bit), or whatever is recommended
     Choose Storage: Select your MicroSD card
 4. After clicking `Next`, click `Edit Settings`.
-    * Set hostname (e.g. pi)
+    * Set hostname to `pi` (See note below)
     * Set username and password
     * Configure Wi-Fi (SSID, password, country)
     * Enable SSH
 5. Click Write to flash the SD card.
+
+> Note: This project assumes the Raspberry Pi's hostname is set to `pi`, and some scripts contain hardcoded references to that hostname and related paths (e.g., `pi@pi.local`, `/home/pi/...`).
+>
+> If you change the hostname or use a different username during setup, you will need to manually update the affected scripts accordingly.
+
+To avoid extra setup steps, it’s recommended to keep the hostname as pi.
 
 ### Insert and Boot
 1. Insert the flashed MicroSD card into the Raspberry Pi.
@@ -78,7 +84,7 @@ Before installing PiPeline, you need to prepare your Raspberry Pi by installing 
 
 ### Connect to the Pi via SSH
 After the Pi boots (~1 minute), connect from your computer:
-```
+```bash
 ssh pi@pi.local
 ```
 If `pi.local` doesn't work, find the Pi's IP address using your router settings or a tool like `arp -a`.
@@ -86,15 +92,15 @@ If `pi.local` doesn't work, find the Pi's IP address using your router settings 
 ### (Optional) Set Up SSH Key Authentication
 To avoid typing your password every time you connect:
 1. Check if you have an SSH key:
-```
+```bash
 ls ~/.ssh/id_ed25519.pub
 ```
 2. If you don't have one, generate it:
-```
+```bash
 ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
 3. Copy the key to the Pi:
-```
+```bash
 ssh-copy-id pi@pi.local
 ```
 After this, you should be able to SSH into your Pi without typing your password each time.
@@ -102,15 +108,15 @@ After this, you should be able to SSH into your Pi without typing your password 
 ### (Optional) Set Up SSH Key Authentication for Github
 On the pi,
 1. Check if you have an SSH key:
-```
+```bash
 ls -al ~/.ssh
 ```
 2. If you don't have one, generate it:
-```
+```bash
 ssh-keygen -t ed25519 -C "git access for pi"
 ```
 3. Copy the key:
-```
+```bash
 cat ~/.ssh/id_ed25519.pub
 ```
 4. [Set up a new key on Github](https://github.com/settings/ssh/new):
@@ -122,7 +128,7 @@ cat ~/.ssh/id_ed25519.pub
 
 1. On your Mac, clone the project and run the install script
 (To get stats, scripts would have to be run from your Mac)
-```
+```bash
 git clone git@github.com:NCCA/pipeline-project-AnuKritiW.git
 cd pipeline-project-AnuKritiW
 chmod +x install/install-mac.sh
@@ -132,15 +138,22 @@ chmod +x install/install-mac.sh
 ### On the Pi
 
 1. Clone the project and run the install script:
-```
-git clone git@github.com:NCCA/pipeline-project-AnuKritiW.git
+```bash
+git clone git@github.com:NCCA/pipeline-project-AnuKritiW.git # Do this in the home directory (See note below)
 cd pipeline-project-AnuKritiW
 chmod +x install-pi.sh
 ./install-pi.sh
 ```
 
+> Note: This project assumes the repository is cloned into the home directory with the exact folder name `pipeline-project-AnuKritiW`.
+>
+> Several scripts contain hardcoded paths that rely on this structure (e.g., `~/pipeline-project-AnuKritiW/...`).
+>
+> If you clone it elsewhere or rename the folder, you will need to manually update the affected scripts, or consider setting an environment variable to point to the correct path.
+
+
 2. (If needed) Reboot the pi
-```
+```bash
 sudo reboot
 ```
 
@@ -149,7 +162,7 @@ sudo reboot
 ### On Developer Machine
 
 1. To send pc stats to the pi
-```
+```bash
 source venv/bin/activate
 chmod +x scripts/sendstats.sh
 ./scripts/sendstats.sh
@@ -167,7 +180,7 @@ This script is a continuously running script that will send CPU usage, GPU usage
 2. Choose the profile you would like to load up on the pi
 
 \* Some useful systemd commands
-```
+```bash
 sudo systemctl stop pipeline-project.service    # to stop running
 sudo systemctl status pipeline-project.service  # confirm it has stopped running
 sudo systemctl start pipeline-project.service   # to start running
@@ -178,14 +191,14 @@ sudo systemctl enable pipeline-project.service  # Enable auto start on boot
 ## Testing
 
 ### Run the complete test suite
-```
+```bash
 cd pipeline-project-AnuKritiW
 source ~/.virtualenvs/pimoroni/bin/activate
 pytest tests/
 ```
 
 ### Test coverage
-```
+```bash
 cd pipeline-project-AnuKritiW
 source ~/.virtualenvs/pimoroni/bin/activate
 pytest --cov=web_app --cov=scripts tests/
@@ -214,7 +227,7 @@ TOTAL                                     529     66    88%
 ### Continuous Integration with GitHub Actions
 All unit tests located in the tests/ directory are run automatically on each push and pull request.
 The workflow file is located at:
-```
+```bash
 .github/workflows/tests.yml
 ```
 > **Note:**
